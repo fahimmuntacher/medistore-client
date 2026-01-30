@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { ModeToggle } from "./ui/moodToggle";
 import AddShoppingCartIcon from "./ui/AddShoppingCartIcon";
+import { CartIcon } from "./ui/cartIcon";
 
 interface MenuItem {
   title: string;
@@ -70,12 +71,12 @@ const Navbar1 = ({
   menu = [
     { title: "Home", url: "/" },
     { title: "Medicines", url: "/medicines" },
-    { title: "Contact", url: "/contact" },
+    { title: "Contact Us", url: "/contact" },
     { title: "About Us", url: "/about-us" },
   ],
   auth = {
-    login: { title: "Login", url: "#" },
-    signup: { title: "Sign up", url: "#" },
+    login: { title: "Login", url: "/login" },
+    signup: { title: "Sign up", url: "/register" },
   },
   className,
 }: Navbar1Props) => {
@@ -105,7 +106,7 @@ const Navbar1 = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ShoppingCart></ShoppingCart>
+            <CartIcon></CartIcon>
             <ModeToggle></ModeToggle>
             <Button asChild variant="outline" size="sm">
               <a href={auth.login.url}>{auth.login.title}</a>
