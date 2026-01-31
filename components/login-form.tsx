@@ -20,6 +20,8 @@ import SocialLogin from "@/src/shared/SocialLogin";
 import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 // Zod schema for login form
 const loginSchema = z.object({
@@ -55,9 +57,21 @@ export function LoginForm({
         return;
       }
 
-      console.log("Login submitted successfully:", result.data);
-      // Handle login here
-      // Example: await loginUser(result.data);
+      // console.log("Login submitted successfully:", result.data);
+      try {
+        const toastId = toast.loading("Hold on, we're getting you in...");
+        const { data, error } = await authClient.signIn.email(value);
+        if (error) {
+          toast.error(error.message, { id: toastId });
+          return;
+        }
+
+        toast.success("Great to see you again!", { id: toastId });
+        console.log(data);
+      } catch (error) 
+      {
+        toast.error("Something went wrong, Please try again!")
+      }
     },
   });
 

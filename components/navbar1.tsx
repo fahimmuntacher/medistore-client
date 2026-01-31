@@ -1,5 +1,3 @@
-"use client";
-
 import { Book, Menu, ShoppingCart, Sunset, Trees, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -28,7 +26,6 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { ModeToggle } from "./ui/moodToggle";
-import AddShoppingCartIcon from "./ui/AddShoppingCartIcon";
 import { CartIcon } from "./ui/cartIcon";
 
 interface MenuItem {
@@ -61,7 +58,7 @@ interface Navbar1Props {
   };
 }
 
-const Navbar1 = ({
+const Navbar1 = async ({
   logo = {
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
@@ -129,7 +126,6 @@ const Navbar1 = ({
               />
             </a>
             <Sheet>
-             
               <ModeToggle></ModeToggle>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
