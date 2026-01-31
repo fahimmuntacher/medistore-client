@@ -28,6 +28,9 @@ import {
 } from "./ui/select";
 import SocialLogin from "@/src/shared/SocialLogin";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // Zod schema with best practices
 const formSchema = z
@@ -82,6 +85,57 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Helper function to upload image to Cloudinary
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        let errorData;
+        try {
+          errorData = await uploadRes.json();
+        } catch {
+          errorData = { error: `Server error (${uploadRes.status})` };
+        }
+
+        // Handle specific status codes
+        if (uploadRes.status === 500) {
+          throw new Error(
+            errorData.error ||
+              "Server error during image upload. This might be due to missing Cloudinary configuration. Please contact support.",
+          );
+        }
+
+        const errorMessage =
+          errorData.error || `Image upload failed (${uploadRes.status})`;
+        throw new Error(errorMessage);
+      }
+
+      const uploadData = await uploadRes.json();
+
+      if (!uploadData.url) {
+        throw new Error("Image upload succeeded but no URL was returned");
+      }
+
+      return uploadData.url;
+    } catch (uploadError: any) {
+      // Re-throw upload errors with context
+      if (uploadError.message) {
+        throw uploadError;
+      }
+      throw new Error("Failed to upload image. Please try again.");
+    }
+  };
+
   const form = useForm({
     defaultValues: {
       name: "",
@@ -97,12 +151,56 @@ export function SignupForm({
 
       if (!result.success) {
         console.error("Validation errors:", result.error.flatten());
+        toast.error("Please fix the validation errors");
         return;
       }
 
-      console.log("Form submitted successfully:", result.data);
-      // Handle form submission here
-      // Example: await registerUser(result.data);
+      const toastId = toast.loading("Uploading image...");
+      setIsUploading(true);
+
+      try {
+        let imageUrl = result.data.image;
+
+        // If there's a selected file, upload it to Cloudinary first
+        if (selectedImageFile) {
+          try {
+            imageUrl = await uploadImageToCloudinary(selectedImageFile);
+            toast.loading("Registering user...", { id: toastId });
+          } catch (uploadError: any) {
+            toast.error(uploadError.message || "Failed to upload image", {
+              id: toastId,
+            });
+            setIsUploading(false);
+            return;
+          }
+        }
+
+        // Now register the user with the Cloudinary image URL
+        const { data, error } = await authClient.signUp.email({
+          ...result.data,
+          image: imageUrl, // Use the Cloudinary URL
+        });
+
+        if (error) {
+          toast.error(error.message, { id: toastId });
+          setIsUploading(false);
+          return;
+        }
+
+        toast.success("User Registered Successfully", { id: toastId });
+        console.log(data);
+
+        // Reset form and state
+        form.reset();
+        setSelectedImageFile(null);
+      } catch (error: any) {
+        console.error("Registration error:", error);
+        toast.error(error.message || "Something went wrong! Please try again", {
+          id: toastId,
+        });
+      } finally {
+        setIsUploading(false);
+      }
     },
   });
 
@@ -171,6 +269,7 @@ export function SignupForm({
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isUploading}
                       />
                       {isInvalid && (
                         <FieldError>
@@ -205,6 +304,7 @@ export function SignupForm({
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isUploading}
                       />
                       {isInvalid && (
                         <FieldError>
@@ -238,9 +338,13 @@ export function SignupForm({
                         id="user_image"
                         accept="image/*"
                         onBlur={field.handleBlur}
+                        disabled={isUploading}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            // Store the actual file for later upload
+                            setSelectedImageFile(file);
+                            // Create a blob URL for validation
                             const url = URL.createObjectURL(file);
                             field.handleChange(url);
                           }
@@ -250,6 +354,12 @@ export function SignupForm({
                         <FieldError>
                           {field.state.meta.errors.join(", ")}
                         </FieldError>
+                      )}
+                      {selectedImageFile && !isInvalid && (
+                        <FieldDescription>
+                          Selected: {selectedImageFile.name} (
+                          {(selectedImageFile.size / 1024).toFixed(2)} KB)
+                        </FieldDescription>
                       )}
                     </Field>
                   );
@@ -277,6 +387,7 @@ export function SignupForm({
                         onValueChange={(value) =>
                           field.handleChange(value as "SELLER" | "CUSTOMER")
                         }
+                        disabled={isUploading}
                       >
                         <SelectTrigger id="user_role" className="w-full">
                           <SelectValue placeholder="Select a role" />
@@ -319,6 +430,7 @@ export function SignupForm({
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isUploading}
                       />
                       {isInvalid && (
                         <FieldError>
@@ -369,6 +481,7 @@ export function SignupForm({
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isUploading}
                       />
                       {isInvalid && (
                         <FieldError>
@@ -383,10 +496,15 @@ export function SignupForm({
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-3.5 items-center justify-center">
-          <Button form="register-form" className="w-full" type="submit">
-            Register now
+          <Button
+            form="register-form"
+            className="w-full"
+            type="submit"
+            disabled={isUploading}
+          >
+            {isUploading ? "Uploading..." : "Register now"}
           </Button>
-          
+
           <SocialLogin></SocialLogin>
           <FieldDescription className="text-center mt-2.5">
             Already have an account? <Link href="/login">Log in</Link>
