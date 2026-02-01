@@ -28,6 +28,11 @@ import Link from "next/link";
 import { ModeToggle } from "./ui/moodToggle";
 import { CartIcon } from "./ui/cartIcon";
 
+import { getCurrentUser } from "@/lib/get-user";
+import { AvatarDropdown } from "./AvatarDropDown";
+
+
+
 interface MenuItem {
   title: string;
   url: string;
@@ -77,11 +82,12 @@ const Navbar1 = async ({
   },
   className,
 }: Navbar1Props) => {
+  const user = await getCurrentUser();
   return (
     <section className={cn("py-4", className)}>
       <div className="container mx-auto">
         {/* Desktop Menu */}
-        <nav className="hidden items-center  justify-between lg:flex">
+        <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
@@ -103,14 +109,20 @@ const Navbar1 = async ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <CartIcon></CartIcon>
-            <ModeToggle></ModeToggle>
-            <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.title}</a>
-            </Button>
-            <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.title}</a>
-            </Button>
+            <CartIcon />
+            <ModeToggle />
+            {user ? (
+              <AvatarDropdown user={user} />
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <a href={auth.login.url}>{auth.login.title}</a>
+                </Button>
+                <Button asChild size="sm">
+                  <a href={auth.signup.url}>{auth.signup.title}</a>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -125,45 +137,48 @@ const Navbar1 = async ({
                 alt={logo.alt}
               />
             </a>
-            <Sheet>
-              <ModeToggle></ModeToggle>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
-                      <img
-                        src={logo.src}
-                        className="max-h-8 dark:invert"
-                        alt={logo.alt}
-                      />
-                    </a>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-6 p-4">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
-                  >
-                    {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
-
-                  <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <a href={auth.login.url}>{auth.login.title}</a>
-                    </Button>
-                    <Button asChild>
-                      <a href={auth.signup.url}>{auth.signup.title}</a>
-                    </Button>
+            <div className="flex items-center gap-2">
+              <CartIcon />
+              <ModeToggle />
+              {user ? (
+                <AvatarDropdown user={user}/>
+              ) : (
+                <>
+                  <Button asChild variant="outline" size="sm">
+                    <a href={auth.login.url}>{auth.login.title}</a>
+                  </Button>
+                </>
+              )}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="size-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>
+                      <a href={logo.url} className="flex items-center gap-2">
+                        <img
+                          src={logo.src}
+                          className="max-h-8 dark:invert"
+                          alt={logo.alt}
+                        />
+                      </a>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-6 p-4">
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="flex w-full flex-col gap-4"
+                    >
+                      {menu.map((item) => renderMobileMenuItem(item))}
+                    </Accordion>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
