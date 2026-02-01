@@ -21,9 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { da } from "zod/v4/locales";
+import { useCart } from "@/src/Context/Cartcontext";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Medicine = {
   id: string;
@@ -65,7 +65,7 @@ type FetchParams = {
 
 const MAX_PRICE_LIMIT = 100;
 
-// ─── API helper ──────────────────────────────────────────────────────────────
+// ─── API helper ───────────────────────────────────────────────────────────────
 
 const fetchMedicines = async ({
   search,
@@ -81,22 +81,20 @@ const fetchMedicines = async ({
   params.append("page", String(page));
 
   const { data } = await api.get<MedicinesResponse>(
-    `/medicines?${params.toString()}`
+    `/medicines?${params.toString()}`,
   );
-  // console.log(data);
   return data;
 };
 
-// ─── Utility: average rating ─────────────────────────────────────────────────
+// ─── Utility ──────────────────────────────────────────────────────────────────
 
 const getAverageRating = (reviews: Medicine["reviews"]): number => {
   if (!reviews || reviews.length === 0) return 0;
   return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 };
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Skeleton placeholder shown while the query is loading. */
 const MedicineCardSkeleton = () => (
   <div className="rounded-lg border bg-white shadow-sm animate-pulse">
     <div className="h-48 bg-gray-200 rounded-t-lg" />
@@ -110,13 +108,26 @@ const MedicineCardSkeleton = () => (
   </div>
 );
 
-/** Renders a single medicine card. */
 const MedicineCard: React.FC<{ medicine: Medicine }> = ({ medicine }) => {
-  const avgRating = getAverageRating(medicine.reviews);
+  const { addToCart } = useCart();
+  const [added, setAdded] = useState(false);
 
-  
+  const avgRating = getAverageRating(medicine.reviews);
   const hasDiscount =
     medicine.discountPrice > 0 && medicine.discountPrice < medicine.price;
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: medicine.id,
+      name: medicine.name,
+      image: medicine.image,
+      price: hasDiscount ? medicine.discountPrice : medicine.price,
+    });
+
+    // Show "Added ✓" for 1.5 s then reset
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   return (
     <Card className="hover:shadow-lg transition-shadow flex flex-col">
@@ -130,9 +141,8 @@ const MedicineCard: React.FC<{ medicine: Medicine }> = ({ medicine }) => {
 
       <CardContent className="flex-1 flex flex-col gap-2">
         <CardTitle className="text-lg">{medicine.name}</CardTitle>
-        {/* <CardDescription>{medicine.description}</CardDescription> */}
+        <CardDescription>{medicine.description}</CardDescription>
 
-        {/* Price */}
         <div className="flex items-center gap-2">
           {hasDiscount ? (
             <>
@@ -151,9 +161,7 @@ const MedicineCard: React.FC<{ medicine: Medicine }> = ({ medicine }) => {
         <p className="text-sm text-gray-600">
           Stock:{" "}
           <span
-            className={
-              medicine.stock === 0 ? "text-red-500 font-medium" : ""
-            }
+            className={medicine.stock === 0 ? "text-red-500 font-medium" : ""}
           >
             {medicine.stock === 0 ? "Out of stock" : medicine.stock}
           </span>
@@ -170,8 +178,16 @@ const MedicineCard: React.FC<{ medicine: Medicine }> = ({ medicine }) => {
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full" disabled={medicine.stock === 0}>
-          {medicine.stock === 0 ? "Out of Stock" : "Add to Cart"}
+        <Button
+          className="w-full"
+          disabled={medicine.stock === 0 || added}
+          onClick={handleAddToCart}
+        >
+          {medicine.stock === 0
+            ? "Out of Stock"
+            : added
+              ? "Added ✓"
+              : "Add to Cart"}
         </Button>
       </CardFooter>
     </Card>
@@ -243,7 +259,7 @@ const Pagination: React.FC<{
   );
 };
 
-// ─── Main page ───────────────────────────────────────────────────────────────
+// ─── Main page ────────────────────────────────────────────────────────────────
 
 const MedicinesPage = () => {
   const [search, setSearch] = useState<string>("");
@@ -256,15 +272,15 @@ const MedicinesPage = () => {
     queryFn: () => fetchMedicines({ search, category, maxPrice, page }),
   });
 
-  // Fetch categories from /categories — cached independently, fetched once
-  const { data: categories, isLoading: isCategoriesLoading } =
-    useQuery<Category[]>({
-      queryKey: ["categories"],
-      queryFn: async () => {
-        const { data } = await api.get<Category[]>("/categories");
-        return data;
-      },
-    });
+  const { data: categories, isLoading: isCategoriesLoading } = useQuery<
+    Category[]
+  >({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data } = await api.get<Category[]>("/categories");
+      return data;
+    },
+  });
 
   const handleCategoryChange = useCallback((value: string) => {
     setCategory(value);
@@ -282,7 +298,7 @@ const MedicinesPage = () => {
   }, []);
 
   return (
-    <div className="py-6 container mx-auto">
+    <div className="py-6 px-2.5 container mx-auto">
       <h1 className="text-3xl font-bold mb-6">Medicines Store</h1>
 
       {/* ── Filters ── */}
@@ -300,13 +316,10 @@ const MedicinesPage = () => {
         <Select onValueChange={handleCategoryChange} value={category}>
           <SelectTrigger className="w-48" disabled={isCategoriesLoading}>
             <SelectValue
-              placeholder={
-                isCategoriesLoading ? "Loading…" : "Select Category"
-              }
+              placeholder={isCategoriesLoading ? "Loading…" : "Select Category"}
             />
           </SelectTrigger>
           <SelectContent>
-            {/* "all" sentinel — shadcn forbids value="" */}
             <SelectItem value="all">All</SelectItem>
             {categories?.map((cat) => (
               <SelectItem key={cat.id} value={cat.slug}>
@@ -328,10 +341,6 @@ const MedicinesPage = () => {
             step={1}
           />
         </div>
-
-        <Button type="submit" className="self-end">
-          Apply
-        </Button>
       </form>
 
       {/* ── Medicine grid ── */}

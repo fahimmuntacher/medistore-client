@@ -52,8 +52,8 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
         <DropdownMenuContent className="w-56" align="end">
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href="/profile" className="cursor-pointer">
-                Profile
+              <Link href="/dashboard" className="cursor-pointer">
+                Dashboard
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -62,7 +62,7 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/settings" className="cursor-pointer">
+              <Link href="/dashboard" className="cursor-pointer">
                 Settings
               </Link>
             </DropdownMenuItem>
@@ -70,7 +70,8 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
-              className="text-destructive focus:text-destructive cursor-pointer"
+            variant="destructive"
+              className="text-destructive  cursor-pointer"
               onSelect={() => setShowSignOutDialog(true)}
             >
               <LogOut className="mr-2 h-4 w-4" />
