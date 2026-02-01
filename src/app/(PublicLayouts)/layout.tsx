@@ -18,7 +18,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Footer */}
       <Footer />
-    </div>
+    </div>  
   );
 };
 

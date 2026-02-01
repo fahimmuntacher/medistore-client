@@ -127,6 +127,7 @@ const MedicineCard: React.FC<{ medicine: Medicine }> = ({ medicine }) => {
     // Show "Added ✓" for 1.5 s then reset
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
+    
   };
 
   return (

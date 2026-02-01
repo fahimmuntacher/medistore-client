@@ -6,22 +6,34 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/src/Context/Cartcontext";
+import Link from "next/link";
 
 export function ShoppingCartSheet() {
-  const { items, subtotal, incrementItem, decrementItem, removeFromCart, placeOrder } =
-    useCart();
+  const {
+    items,
+    subtotal,
+    incrementItem,
+    decrementItem,
+    removeFromCart,
+    placeOrder,
+  } = useCart();
 
   const [isOrdering, setIsOrdering] = useState(false);
-  const [orderStatus, setOrderStatus] = useState<"idle" | "success" | "error">("idle");
+  const [orderStatus, setOrderStatus] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
 
   const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price);
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(price);
 
   const handleCheckout = async () => {
     setIsOrdering(true);
     setOrderStatus("idle");
     try {
-      await placeOrder();
+      await placeOrder("COD");
       setOrderStatus("success");
     } catch {
       setOrderStatus("error");
@@ -38,7 +50,9 @@ export function ShoppingCartSheet() {
         {orderStatus === "success" ? (
           <>
             <div className="text-green-600 text-5xl">✓</div>
-            <p className="text-lg font-semibold text-green-600">Order placed!</p>
+            <p className="text-lg font-semibold text-green-600">
+              Order placed!
+            </p>
             <p className="text-sm text-muted-foreground">
               Thank you for your purchase. Your order is being processed.
             </p>
@@ -46,7 +60,9 @@ export function ShoppingCartSheet() {
         ) : (
           <>
             <p className="text-muted-foreground">Your cart is empty</p>
-            <Button variant="outline">Continue Shopping</Button>
+            <Link href="/medicines">
+              <Button variant="outline">Continue Shopping</Button>
+            </Link>
           </>
         )}
       </div>
