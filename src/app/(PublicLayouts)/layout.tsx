@@ -3,13 +3,22 @@ import { Navbar1 } from "@/components/navbar1";
 import React from "react";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
-  return <div className="flex  flex-col justify-between min-h-screen">
-    <Navbar1></Navbar1>
-    <div className="flex-1">
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar */}
+      <header className="sticky top-0 z-50">
+        <Navbar1 />
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 bg-muted">
         {children}
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
-    <Footer></Footer>
-    </div>;
+  );
 };
 
 export default layout;

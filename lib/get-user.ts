@@ -7,7 +7,7 @@ export const getCurrentUser = cache(async () => {
   try {
     const cookieStore = await cookies();
     
-    const res = await fetch(`${process.env.API_BASE_URL}/api/auth/get-session`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH_URL}/get-session`, {
       headers: {
         Cookie: cookieStore.toString(),
       },

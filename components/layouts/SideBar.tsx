@@ -1,3 +1,4 @@
+"use client";
 import {
   BarChart3,
   ClipboardList,
@@ -33,6 +34,8 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
+import { generateBreadcrumbs } from "@/src/helpers/generateBreadcrumbs";
 
 type NavItem = {
   label: string;
@@ -157,38 +160,52 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   );
 };
 
-
-
 interface DashboardSidebarProps {
   className?: string;
   children: React.ReactNode;
 }
 
-const DashbaordSidebar = ({className, children} : DashboardSidebarProps) => {
+const DashbaordSidebar = ({ className, children }: DashboardSidebarProps) => {
+  const pathname = usePathname();
+  const breadcrumbs = generateBreadcrumbs(pathname);
+
   return (
     <SidebarProvider className={cn(className)}>
       <AppSidebar />
+
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">Overview</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                <BreadcrumbLink href="/">Overview</BreadcrumbLink>
               </BreadcrumbItem>
+
+              {breadcrumbs.map((crumb) => (
+                <div key={crumb.href} className="flex items-center gap-1">
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    {crumb.isLast ? (
+                      <BreadcrumbPage className="capitalize">
+                        {crumb.label}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink href={crumb.href} className="capitalize">
+                        {crumb.label}
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </div>
+              ))}
             </BreadcrumbList>
           </Breadcrumb>
         </header>
+
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="min-h-screen flex-1 rounded-xl bg-muted/10 md:min-h-min">
+          <div className="min-h-screen flex-1 rounded-xl bg-muted/10">
             {children}
           </div>
         </div>

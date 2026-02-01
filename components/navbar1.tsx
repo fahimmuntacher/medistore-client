@@ -84,7 +84,7 @@ const Navbar1 = async ({
 }: Navbar1Props) => {
   const user = await getCurrentUser();
   return (
-    <section className={cn("py-4", className)}>
+    <section className={cn("py-4 bg-background", className)}>
       <div className="container mx-auto">
         {/* Desktop Menu */}
         <nav className="hidden items-center justify-between lg:flex">

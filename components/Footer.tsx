@@ -83,7 +83,7 @@ const Footer = ({
   ],
 }: Footer2Props) => {
   return (
-    <section className={cn("py-32", className)}>
+    <section className={cn("py-12", className)}>
       <div className="container mx-auto px-3 md:px-0">
         <footer>
           <div className="grid grid-cols-2 gap-8 lg:grid-cols-6">
