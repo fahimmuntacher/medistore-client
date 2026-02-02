@@ -26,10 +26,11 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { ModeToggle } from "./ui/moodToggle";
-import { CartIcon } from "./ui/cartIcon";
 
 import { getCurrentUser } from "@/lib/get-user";
 import { AvatarDropdown } from "./AvatarDropDown";
+import { CartDrawer } from "./CartDrawer";
+
 
 
 
@@ -109,7 +110,8 @@ const Navbar1 = async ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <CartIcon />
+            {/* <CartSheet /> */}
+            <CartDrawer></CartDrawer>
             <ModeToggle />
             {user ? (
               <AvatarDropdown user={user} />
@@ -138,7 +140,8 @@ const Navbar1 = async ({
               />
             </a>
             <div className="flex items-center gap-2">
-              <CartIcon />
+              {/* <CartSheet /> */}
+              <CartDrawer></CartDrawer>
               <ModeToggle />
               {user ? (
                 <AvatarDropdown user={user}/>

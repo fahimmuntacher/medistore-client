@@ -1,19 +1,20 @@
 "use client";
 
+import { Medicine } from "@/src/types/medicine";
 import { MedicineCard } from "./MedicineCard";
 import { MedicineCardSkeleton } from "./MedicineCardSkeleton";
 
-type Medicine = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  discountPrice?: number;
-  stock: number;
-  manufacturer: string;
-  image: string;
-  reviews: { rating: number }[];
-};
+// type Medicine = {
+//   id: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   discountPrice?: number;
+//   stock: number;
+//   manufacturer: string;
+//   image: string;
+//   reviews: { rating: number }[];
+// };
 
 type Props = {
   medicines: Medicine[];
