@@ -1,6 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Navbar1 } from "@/components/navbar1";
-import { CartProvider } from "@/src/Context/Cartcontext";
+import { CartProvider } from "@/src/providers/CartProvider";
 import React from "react";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
@@ -18,7 +18,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Footer */}
       <Footer />
-    </div>  
+    </div>
   );
 };
 

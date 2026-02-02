@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useCart } from "@/src/Context/Cartcontext";
+import { useCart } from "@/src/Context/CartContext";
 import Link from "next/link";
 
 export function ShoppingCartSheet() {

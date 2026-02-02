@@ -36,7 +36,9 @@ export default function RootLayout({
         >
           <Toaster richColors position="bottom-right" />
 
-          <QueryProvider>{children}</QueryProvider>
+         
+            <QueryProvider>{children}</QueryProvider>
+          
         </ThemeProvider>
       </body>
     </html>
