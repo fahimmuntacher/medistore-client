@@ -24,3 +24,4 @@ export const CartService = {
     await api.delete("/cart/clear")
   },
 }
+

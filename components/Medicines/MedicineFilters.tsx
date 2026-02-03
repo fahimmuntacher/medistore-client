@@ -74,12 +74,12 @@ export function MedicineFilters({
       <div className="w-64 space-y-1.5">
         <div className="flex justify-between text-sm">
           <span>Max price</span>
-          <span>${maxPrice}</span>
+          <span>৳ {maxPrice}</span>
         </div>
         <Slider
           value={[maxPrice]}
           min={0}
-          max={100}
+          max={1500}
           step={1}
           onValueChange={(v) => setMaxPrice(v[0])}
         />
@@ -94,3 +94,7 @@ export function MedicineFilters({
     </div>
   );
 }
+
+
+
+

@@ -11,6 +11,7 @@ interface CartStore {
   addItem: (medicineId: string, price : number, isLoggedIn: boolean) => Promise<void>;
   updateQty: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -70,5 +71,15 @@ export const useCartStore = create<CartStore>((set, get) => ({
     } catch (error) {
       toast.error("Failed to remove item");
     }
-  }
+  },
+
+  clearCart: async () => {
+    try {
+      await api.delete("/cart/clear");
+      set({ items: [], total: 0 }); // Locally reset state after successful API call
+    } catch (error) {
+      console.error("Failed to clear cart", error);
+      toast.error("Order placed, but failed to clear cart session.");
+    }
+  },
 }));

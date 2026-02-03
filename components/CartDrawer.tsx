@@ -9,10 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus, Minus, Trash2, Pill } from "lucide-react";
 import { useCartStore } from "@/src/app/store/CartStore";
+import Link from "next/link";
 
 export function CartDrawer() {
   const { items, total, updateQty, removeItem } = useCartStore();
-//  console.log(items);
+  //  console.log(items);
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -41,7 +42,6 @@ export function CartDrawer() {
           ) : (
             <div className="space-y-4 px-5">
               {items.map((item) => (
-                
                 <div
                   key={item.id}
                   className="flex gap-4 p-3 bg-muted/40 rounded-xl border border-border/50"
@@ -101,9 +101,11 @@ export function CartDrawer() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="text-2xl font-bold">৳{total.toFixed(2)}</span>
             </div>
-            <Button className="w-full h-12 text-lg font-bold">
-              Proceed to Checkout
-            </Button>
+            <Link href="/checkout">
+              <Button className="w-full h-12 text-lg font-bold">
+                Proceed to Checkout
+              </Button>
+            </Link>
           </div>
         )}
       </SheetContent>

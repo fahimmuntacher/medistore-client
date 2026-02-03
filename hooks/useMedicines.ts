@@ -15,7 +15,7 @@ export function useMedicines(params: FetchParams) {
       const query = new URLSearchParams(
         Object.entries(params)
           .filter(([_, v]) => v !== undefined && v !== "all")
-          .map(([k, v]) => [k, String(v)])
+          .map(([k, v]) => [k, String(v)]),
       ).toString();
 
       const { data } = await api.get(`/medicines${query ? `?${query}` : ""}`);
@@ -28,7 +28,7 @@ export function useMedicines(params: FetchParams) {
 export function useCategories() {
   return useQuery({
     queryKey: ["categories"],
-    queryFn: () => api.get("/categories").then(r => r.data),
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    queryFn: () => api.get("/categories").then((r) => r.data),
+    staleTime: 1000 * 60 * 30,
   });
 }

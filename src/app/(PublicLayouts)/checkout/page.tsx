@@ -1,606 +1,367 @@
 "use client";
 
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useCartStore } from "@/src/app/store/CartStore";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
-  ArrowLeft,
-  CreditCard,
-  Eye,
-  EyeOff,
-  Gift,
-  Lock,
-  Shield,
-  Tag,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Minus,
+  Plus,
+  Trash2,
   Truck,
+  CreditCard,
+  ShieldCheck,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
+import { OrderService } from "@/src/services/order.service";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useState } from "react";
+import { FieldError } from "@/components/ui/field";
+import SucessModal from "./SucessModal";
 
-export default function CheckoutForm1() {
-  const [step, setStep] = useState(1);
-  const [showCvv, setShowCvv] = useState(false);
-  const [formData, setFormData] = useState({
-    // Personal Information
-    email: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
+const addressSchema = z.object({
+  fullName: z.string().min(3, "Full Name must be at least 3 characters"),
+  phone: z
+    .string()
+    .regex(
+      /^(?:\+88|88)?(01[3-9]\d{8})$/,
+      "Enter a valid Bangladeshi phone number",
+    ),
+  city: z.string().min(2, "Enter City Name"),
+  area: z.string().min(2, "Enter Area Name"),
+  details: z.string().min(5, "Enter your address in detail"),
+});
 
-    // Shipping Address
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "US",
+export default function CheckoutPage() {
+  // ✅ Added clearCart from your store
+  const { items, total, updateQty, removeItem, fetchCart, clearCart } =
+    useCartStore();
+  const router = useRouter();
+  const [orderId, setOrderId] = useState<string | null>(null);
 
-    // Payment
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    cardName: "",
+  const form = useForm({
+    defaultValues: {
+      fullName: "",
+      phone: "",
+      city: "",
+      area: "",
+      details: "",
+    },
+    validators: {
+      onChange: addressSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (items.length === 0) {
+        toast.error("Your cart is empty!");
+        return;
+      }
 
-    // Options
-    saveInfo: false,
-    sameAsBilling: true,
-    newsletter: false,
-    promoCode: "",
+      const toastId = toast.loading("Processing your order...");
+
+      try {
+        const payload = {
+          shippingAddress: value,
+          paymentMethod: "COD",
+          items: items.map((item) => ({
+            medicineId: item.medicineId,
+            quantity: item.quantity,
+          })),
+        };
+
+        const res = await OrderService.createOrder(payload as any);
+
+        await clearCart();
+        setOrderId(res.data.id);
+        toast.success("Order Placed Successfully!", { id: toastId });
+      } catch (error: any) {
+        console.error("Order Error:", error);
+        toast.error(
+          error.message || "Failed to place order. Please try again.",
+          { id: toastId },
+        );
+      }
+    },
   });
 
-  const [orderSummary] = useState({
-    items: [
-      {
-        id: 1,
-        name: "Premium Wireless Headphones",
-        variant: "Midnight Black",
-        price: 299.99,
-        quantity: 1,
-        image:
-          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&auto=format&fit=crop&q=60",
-      },
-      {
-        id: 2,
-        name: "Leather Laptop Sleeve",
-        variant: "Brown, 13-inch",
-        price: 89.99,
-        quantity: 1,
-        image:
-          "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&auto=format&fit=crop&q=60",
-      },
-    ],
-    shipping: 15.99,
-    tax: 27.54,
-    discount: 0,
-    promoDiscount: 0,
-  });
+  // SUCCESS UI
+  if (orderId) {
+    return <SucessModal orderId={orderId}></SucessModal>;
+  }
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCardNumberChange = (value: string) => {
-    // Format card number with spaces
-    const formatted = value
-      .replace(/\s/g, "")
-      .replace(/(.{4})/g, "$1 ")
-      .trim();
-    handleInputChange("cardNumber", formatted);
-  };
-
-  const handleExpiryChange = (value: string) => {
-    // Format expiry as MM/YY
-    const formatted = value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2");
-    handleInputChange("expiryDate", formatted);
-  };
-
-  const subtotal = orderSummary.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const total =
-    subtotal +
-    orderSummary.shipping +
-    orderSummary.tax -
-    orderSummary.discount -
-    orderSummary.promoDiscount;
-
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
-  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
-  const [paymentMethod, setPaymentMethod] = useState<"CARD" | "COD">("COD");
   return (
-    <div className="bg-muted/30">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 text-3xl font-bold text-balance">
-            Secure Checkout
-          </h1>
-          <p className="text-muted-foreground">
-            Complete your purchase in just a few steps
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-10 max-w-7xl text-foreground">
+      <h1 className="text-3xl font-bold mb-8">Secure Checkout</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-7">
+          <Card className="bg-card border-border shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <Truck className="h-5 w-5" /> Shipping Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <form.Field name="fullName">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Full Name</label>
+                        <Input
+                          className="bg-background border-input"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="Enter your full name"
+                        />
+                        {field.state.meta.errors.length > 0 && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </div>
+                    )}
+                  </form.Field>
 
-        {/* Progress Indicator */}
-        <div className="mb-8 flex justify-center">
-          <div className="flex items-center space-x-4">
-            {[1, 2, 3].map((stepNumber) => (
-              <div key={stepNumber} className="flex items-center">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors ${
-                    stepNumber <= step
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {stepNumber}
+                  <form.Field name="phone">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          Phone Number
+                        </label>
+                        <Input
+                          className="bg-background border-input"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="e.g. 017XXXXXXXX"
+                        />
+                        {field.state.meta.errors.length > 0 && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </div>
+                    )}
+                  </form.Field>
                 </div>
-                {stepNumber < 3 && (
-                  <div
-                    className={`mx-4 h-1 w-16 rounded transition-colors ${
-                      stepNumber < step ? "bg-primary" : "bg-muted"
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Main Form */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-balance">
-                  {step === 1 && "Contact Information"}
-                  {step === 2 && "Shipping Address"}
-                  {step === 3 && "Payment Details"}
-                </CardTitle>
-                <CardDescription>
-                  {step === 1 && "We'll use this to send you order updates"}
-                  {step === 2 && "Where should we deliver your order?"}
-                  {step === 3 &&
-                    "Your payment information is secure and encrypted"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Step 1: Contact Information */}
-                {step === 1 && (
-                  <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <form.Field name="city">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">City</label>
+                        <Input
+                          className="bg-background border-input"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="Select city"
+                        />
+                        {field.state.meta.errors.length > 0 && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </div>
+                    )}
+                  </form.Field>
+
+                  <form.Field name="area">
+                    {(field) => (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Area</label>
+                        <Input
+                          className="bg-background border-input"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="Select area"
+                        />
+                        {field.state.meta.errors.length > 0 && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </div>
+                    )}
+                  </form.Field>
+                </div>
+
+                <form.Field name="details">
+                  {(field) => (
                     <div className="space-y-2">
-                      <Label htmlFor="email-kL9x23P">Email address</Label>
+                      <label className="text-sm font-medium">
+                        Detailed Address
+                      </label>
                       <Input
-                        id="email-kL9x23P"
-                        type="email"
-                        placeholder="john@example.com"
-                        value={formData.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        className="mt-2"
+                        className="bg-background border-input"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="House number, Street name, etc."
                       />
+                      {field.state.meta.errors.length > 0 && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName-mN7z84Q">First name</Label>
-                        <Input
-                          id="firstName-mN7z84Q"
-                          placeholder="John"
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            handleInputChange("firstName", e.target.value)
-                          }
-                          className="mt-2"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName-pL8w45T">Last name</Label>
-                        <Input
-                          id="lastName-pL8w45T"
-                          placeholder="Doe"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            handleInputChange("lastName", e.target.value)
-                          }
-                          className="mt-2"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone-rM6n82S">
-                        Phone number (optional)
-                      </Label>
-                      <Input
-                        id="phone-rM6n82S"
-                        type="tel"
-                        placeholder="+1 (555) 123-4567"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
-                        }
-                        className="mt-2"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Shipping Address */}
-                {step === 2 && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="address-qP4z17X">Street address</Label>
-                      <Input
-                        id="address-qP4z17X"
-                        placeholder="123 Main Street"
-                        value={formData.address}
-                        onChange={(e) =>
-                          handleInputChange("address", e.target.value)
-                        }
-                        className="mt-2"
-                      />
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="city-sT5y91B">City</Label>
-                        <Input
-                          id="city-sT5y91B"
-                          placeholder="New York"
-                          value={formData.city}
-                          onChange={(e) =>
-                            handleInputChange("city", e.target.value)
-                          }
-                          className="mt-2"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="state-wX3k85M">State</Label>
-                        <Input
-                          id="state-wX3k85M"
-                          placeholder="NY"
-                          value={formData.state}
-                          onChange={(e) =>
-                            handleInputChange("state", e.target.value)
-                          }
-                          className="mt-2"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="zipCode-vZ9q46N">ZIP code</Label>
-                        <Input
-                          id="zipCode-vZ9q46N"
-                          placeholder="10001"
-                          value={formData.zipCode}
-                          onChange={(e) =>
-                            handleInputChange("zipCode", e.target.value)
-                          }
-                          className="mt-2"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="country-bH7l52P">Country</Label>
-                        <Select
-                          value={formData.country}
-                          onValueChange={(value) =>
-                            handleInputChange("country", value)
-                          }
-                        >
-                          <SelectTrigger
-                            id="country-bH7l52P"
-                            className="mt-2 w-full"
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="US">United States</SelectItem>
-                            <SelectItem value="CA">Canada</SelectItem>
-                            <SelectItem value="UK">United Kingdom</SelectItem>
-                            <SelectItem value="AU">Australia</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Payment */}
-                {step === 3 && (
-                  <div className="space-y-6">
-                    {/* Payment Method */}
-                    <div className="space-y-4">
-                      <Label className="text-sm font-medium">
-                        Payment method
-                      </Label>
-                      <RadioGroup
-                        value={paymentMethod}
-                        onValueChange={(val) =>
-                          setPaymentMethod(val as "CARD" | "COD")
-                        }
-                        className="space-y-3"
-                      >
-                        {/* CARD */}
-                        {/* <div className="flex items-center space-x-3 rounded-lg border p-4">
-                          <RadioGroupItem value="CARD" id="card-payment" />
-                          <CreditCard className="size-5 text-muted-foreground" />
-                          <Label
-                            htmlFor="card-payment"
-                            className="flex-1 cursor-pointer"
-                          >
-                            Credit / Debit Card
-                          </Label>
-                        </div> */}
-
-                        {/* COD */}
-                        <div className="flex items-center space-x-3 rounded-lg border p-4">
-                          <RadioGroupItem value="COD" id="cod-payment" />
-                          <Truck className="size-5 text-muted-foreground" />
-                          <Label
-                            htmlFor="cod-payment"
-                            className="flex-1 cursor-pointer"
-                          >
-                            Cash on Delivery
-                          </Label>
-                          <Badge variant="secondary">Recommended</Badge>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    {/* Card Details */}
-                    {/* <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="cardNumber-dK5p83L">Card number</Label>
-                        <Input
-                          id="cardNumber-dK5p83L"
-                          placeholder="1234 5678 9012 3456"
-                          value={formData.cardNumber}
-                          onChange={(e) =>
-                            handleCardNumberChange(e.target.value)
-                          }
-                          maxLength={19}
-                          className="mt-2"
-                        />
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-3">
-                        <div className="space-y-2">
-                          <Label htmlFor="expiryDate-fJ6r29M">Expiry</Label>
-                          <Input
-                            id="expiryDate-fJ6r29M"
-                            placeholder="MM/YY"
-                            value={formData.expiryDate}
-                            onChange={(e) => handleExpiryChange(e.target.value)}
-                            maxLength={5}
-                            className="mt-2"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cvv-gH8s34N">CVV</Label>
-                          <div className="relative">
-                            <Input
-                              id="cvv-gH8s34N"
-                              type={showCvv ? "text" : "password"}
-                              placeholder="123"
-                              value={formData.cvv}
-                              onChange={(e) =>
-                                handleInputChange("cvv", e.target.value)
-                              }
-                              maxLength={4}
-                              className="mt-2 pe-10"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute end-0 top-1/2 h-full -translate-y-1/2 cursor-pointer hover:bg-transparent"
-                              onClick={() => setShowCvv(!showCvv)}
-                            >
-                              {showCvv ? (
-                                <EyeOff className="text-muted-foreground size-4" />
-                              ) : (
-                                <Eye className="text-muted-foreground size-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cardName-hI9t45O">Name on card</Label>
-                          <Input
-                            id="cardName-hI9t45O"
-                            placeholder="John Doe"
-                            value={formData.cardName}
-                            onChange={(e) =>
-                              handleInputChange("cardName", e.target.value)
-                            }
-                            className="mt-2"
-                          />
-                        </div>
-                      </div>
-                    </div> */}
-
-                    {/* Additional Options */}
-                    {/* <div className="space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="saveInfo-jK0u56P"
-                          checked={formData.saveInfo}
-                          onCheckedChange={(checked) =>
-                            handleInputChange("saveInfo", checked as boolean)
-                          }
-                        />
-                        <Label htmlFor="saveInfo-jK0u56P" className="text-sm">
-                          Save payment information for future purchases
-                        </Label>
-                      </div>
-                    </div> */}
-                  </div>
-                )}
-
-                {/* Navigation Buttons */}
-                <div className="flex justify-between pt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={prevStep}
-                    disabled={step === 1}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <ArrowLeft className="size-4" />
-                    Back
-                  </Button>
-
-                  {step < 3 ? (
-                    <Button onClick={nextStep} className="cursor-pointer">
-                      Continue
-                    </Button>
-                  ) : (
-                    <Button className="flex cursor-pointer items-center gap-2">
-                      <Lock className="size-4" />
-                      Complete Order
-                    </Button>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </form.Field>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardHeader>
-                <CardTitle className="text-balance">Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Items */}
-                <div className="space-y-4">
-                  {orderSummary.items.map((item) => (
-                    <div key={item.id} className="flex gap-4">
-                      <div className="relative">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="h-16 w-16 rounded-lg object-cover"
-                        />
-                        <Badge
-                          variant="secondary"
-                          className="absolute -end-2 -top-2 size-6 rounded-full p-0 text-xs"
-                        >
-                          {item.quantity}
-                        </Badge>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="truncate text-sm font-medium">
-                          {item.name}
-                        </h4>
-                        <p className="text-muted-foreground text-xs">
-                          {item.variant}
-                        </p>
-                        <p className="mt-1 text-sm font-medium">
-                          ${item.price}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <Separator />
-
-                {/* Promo Code */}
-                <div className="space-y-2">
-                  <Label htmlFor="promoCode-kL1m67Q" className="text-sm">
-                    Promo code
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="promoCode-kL1m67Q"
-                      placeholder="Enter code"
-                      value={formData.promoCode}
-                      onChange={(e) =>
-                        handleInputChange("promoCode", e.target.value)
-                      }
-                    />
-                    <Button variant="outline" className="cursor-pointer">
-                      Apply
-                    </Button>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Pricing Breakdown */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <Truck className="size-3" />
-                      Shipping
+                <div className="pt-6">
+                  <CardTitle className="text-base flex items-center gap-2 mb-4 text-foreground">
+                    <CreditCard className="h-5 w-5 text-primary" /> Payment
+                    Method
+                  </CardTitle>
+                  <div className="p-4 border-2 border-primary/40 rounded-xl bg-primary/5 flex justify-between items-center border-dashed">
+                    <span className="font-semibold text-sm">
+                      Cash on Delivery (COD)
                     </span>
-                    <span>${orderSummary.shipping.toFixed(2)}</span>
+                    <ShieldCheck className="text-primary h-6 w-6" />
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>${orderSummary.tax.toFixed(2)}</span>
-                  </div>
-                  {orderSummary.promoDiscount > 0 && (
-                    <div className="flex justify-between text-sm text-green-600">
-                      <span className="flex items-center gap-1">
-                        <Tag className="size-3" />
-                        Promo discount
-                      </span>
-                      <span>-${orderSummary.promoDiscount.toFixed(2)}</span>
-                    </div>
+                </div>
+
+                <form.Subscribe selector={(state) => [state.isSubmitting]}>
+                  {([isSubmitting]) => (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type="button"
+                          className="w-full h-14 text-xl font-bold rounded-xl shadow-lg"
+                          disabled={items.length === 0 || isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="animate-spin h-5 w-5" />{" "}
+                              Processing...
+                            </span>
+                          ) : (
+                            `Place Order (৳${total.toFixed(2)})`
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-background border-border">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Confirm Your Order
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to place this order? Please
+                            review your shipping details before confirming.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Review</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => form.handleSubmit()}
+                            className="bg-primary text-primary-foreground"
+                          >
+                            Confirm Order
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
-                </div>
+                </form.Subscribe>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
 
-                <Separator />
-
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+        {/* Right side Order Summary */}
+        <div className="lg:col-span-5">
+          <Card className="sticky top-24 bg-card border-border shadow-md border-t-4 border-t-primary">
+            <CardHeader>
+              <CardTitle className="text-xl">Order Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex gap-4 group bg-muted/50 border border-border/50 p-2.5 rounded-2xl transition-colors hover:bg-muted"
+                >
+                  <div className="h-16 w-16 rounded-md overflow-hidden shrink-0 ">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium line-clamp-1">
+                      {item.name}
+                    </h4>
+                    <p className="text-primary font-bold text-sm">
+                      ৳{item.price}
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center border rounded-md bg-background">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => updateQty(item.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="px-2 text-xs">{item.quantity}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => updateQty(item.id, item.quantity + 1)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Trust Indicators */}
-                <div className="space-y-3 pt-4">
-                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                    <Shield className="size-4 text-green-600" />
-                    <span>SSL encrypted checkout</span>
-                  </div>
-                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                    <Truck className="size-4 text-blue-600" />
-                    <span>Free shipping on orders over $75</span>
-                  </div>
-                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                    <Gift className="size-4 text-purple-600" />
-                    <span>30-day return policy</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </CardContent>
+            <Separator />
+            <CardFooter className="flex flex-col gap-3 pt-6">
+              <div className="flex justify-between w-full text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>৳{total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between w-full text-lg font-bold">
+                <span>Total</span>
+                <span className="text-primary font-black">
+                  ৳{total.toFixed(2)}
+                </span>
+              </div>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </div>
