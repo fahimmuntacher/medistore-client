@@ -22,6 +22,8 @@ import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
 
 // Zod schema for login form
 const loginSchema = z.object({
@@ -43,6 +45,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
   const form = useForm({
     defaultValues: {
       email: "",
@@ -65,12 +68,11 @@ export function LoginForm({
           toast.error(error.message, { id: toastId });
           return;
         }
-
+        router.push("/");
         toast.success("Great to see you again!", { id: toastId });
-        console.log(data);
-      } catch (error) 
-      {
-        toast.error("Something went wrong, Please try again!")
+        // console.log(data);
+      } catch (error) {
+        toast.error("Something went wrong, Please try again!");
       }
     },
   });

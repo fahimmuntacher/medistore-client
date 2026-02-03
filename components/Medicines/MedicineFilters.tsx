@@ -77,6 +77,7 @@ export function MedicineFilters({
           <span>৳ {maxPrice}</span>
         </div>
         <Slider
+        
           value={[maxPrice]}
           min={0}
           max={1500}

@@ -26,14 +26,14 @@ export function CartDrawer() {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md flex flex-col">
+      <SheetContent className="w-[80%] sm:max-w-md flex flex-col ">
         <SheetHeader className="border-b pb-4">
           <SheetTitle className="flex items-center gap-2 text-xl">
             Cart
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 overflow-y-auto py-4 w-full">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground italic">
               <ShoppingCart className="h-12 w-12 mb-2 opacity-20" />

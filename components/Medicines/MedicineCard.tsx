@@ -42,7 +42,7 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
   };
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="flex h-full flex-col justify-between overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-md">
       <Link href={`/medicines/${medicine.id}`}>
         {/* Image */}
         <div className="relative aspect-4/3 bg-muted">

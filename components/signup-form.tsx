@@ -31,6 +31,7 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // Zod schema with best practices
 const formSchema = z
@@ -87,7 +88,7 @@ export function SignupForm({
 }: React.ComponentProps<"div">) {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-
+  const router = useRouter();
   // Helper function to upload image to Cloudinary
   const uploadImageToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -188,7 +189,8 @@ export function SignupForm({
         }
 
         toast.success("User Registered Successfully", { id: toastId });
-        console.log(data);
+        router.push("/");
+        // console.log(data);
 
         // Reset form and state
         form.reset();
