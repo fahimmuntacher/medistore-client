@@ -1,14 +1,17 @@
 "use client";
+import React from "react";
+import Link from "next/link"; // Next.js Link ইম্পোর্ট নিশ্চিত করুন
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   ClipboardList,
   HelpCircle,
   LayoutDashboard,
   Settings,
+  Link as LinkIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,21 +37,10 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
 import { generateBreadcrumbs } from "@/src/helpers/generateBreadcrumbs";
+import { getSidebarData } from "@/src/app/(DashboardLayout)/constant/sidebar-items";
 
-type NavItem = {
-  label: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  href: string;
-  isActive?: boolean;
-};
-
-type NavGroup = {
-  title: string;
-  items: NavItem[];
-};
-
+// types
 type SidebarData = {
   logo: {
     src: string;
@@ -56,51 +48,27 @@ type SidebarData = {
     title: string;
     description: string;
   };
-  navGroups: NavGroup[];
-  footerGroup: NavGroup;
 };
 
 const sidebarData: SidebarData = {
   logo: {
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg",
-    alt: "Shadcnblocks",
-    title: "Shadcnblocks",
-    description: "Build your app",
-  },
-  navGroups: [
-    {
-      title: "Overview",
-      items: [
-        {
-          label: "Dashboard",
-          icon: LayoutDashboard,
-          href: "#",
-          isActive: true,
-        },
-        { label: "Tasks", icon: ClipboardList, href: "#" },
-        { label: "Roadmap", icon: BarChart3, href: "#" },
-      ],
-    },
-  ],
-  footerGroup: {
-    title: "Support",
-    items: [
-      { label: "Help Center", icon: HelpCircle, href: "#" },
-      { label: "Settings", icon: Settings, href: "#" },
-    ],
+    alt: "Logo",
+    title: "Medistore",
+    description: "Healthcare Solution",
   },
 };
 
-const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <SidebarMenuButton size="lg">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary">
+const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => (
+  <SidebarMenu>
+    <SidebarMenuItem>
+      <SidebarMenuButton size="lg" asChild>
+        <Link href="/">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
             <img
               src={logo.src}
               alt={logo.alt}
-              className="size-6 text-primary-foreground invert dark:invert-0"
+              className="size-6 invert dark:invert-0"
             />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
@@ -109,31 +77,47 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
               {logo.description}
             </span>
           </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  );
-};
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  </SidebarMenu>
+);
 
-const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+const AppSidebar = ({
+  role,
+  ...props
+}: { role: string } & React.ComponentProps<typeof Sidebar>) => {
+  const navGroups = getSidebarData(role);
+  const pathname = usePathname();
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <SidebarLogo logo={sidebarData.logo} />
       </SidebarHeader>
       <SidebarContent>
-        {sidebarData.navGroups.map((group) => (
+        {navGroups.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.href}>{item.label}</a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={item.label}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.href}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.href}>
+                          <Icon className="size-4" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -141,18 +125,16 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
-          <SidebarGroupLabel>{sidebarData.footerGroup.title}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sidebarData.footerGroup.items.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.href}>{item.label}</a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/dashboard/settings">
+                  <Settings className="size-4" />
+                  <span>Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarFooter>
       <SidebarRail />
@@ -163,15 +145,21 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
 interface DashboardSidebarProps {
   className?: string;
   children: React.ReactNode;
+  role: string;
 }
 
-const DashbaordSidebar = ({ className, children }: DashboardSidebarProps) => {
+const DashbaordSidebar = ({
+  className,
+  children,
+  role,
+}: DashboardSidebarProps) => {
   const pathname = usePathname();
   const breadcrumbs = generateBreadcrumbs(pathname);
 
   return (
     <SidebarProvider className={cn(className)}>
-      <AppSidebar />
+      
+      <AppSidebar role={role} />
 
       <SidebarInset>
         <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
@@ -180,12 +168,12 @@ const DashbaordSidebar = ({ className, children }: DashboardSidebarProps) => {
 
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Overview</BreadcrumbLink>
-              </BreadcrumbItem>
+              {/* <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Overv</BreadcrumbLink>
+              </BreadcrumbItem> */}
 
               {breadcrumbs.map((crumb) => (
-                <div key={crumb.href} className="flex items-center gap-1">
+                <React.Fragment key={crumb.href}>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     {crumb.isLast ? (
@@ -198,17 +186,13 @@ const DashbaordSidebar = ({ className, children }: DashboardSidebarProps) => {
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
-                </div>
+                </React.Fragment>
               ))}
             </BreadcrumbList>
           </Breadcrumb>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="min-h-screen flex-1 rounded-xl bg-muted/10">
-            {children}
-          </div>
-        </div>
+        <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
