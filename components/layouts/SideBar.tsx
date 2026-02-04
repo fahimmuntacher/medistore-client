@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Link from "next/link"; // Next.js Link ইম্পোর্ট নিশ্চিত করুন
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
@@ -38,7 +38,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { generateBreadcrumbs } from "@/src/helpers/generateBreadcrumbs";
-import { getSidebarData } from "@/src/app/(DashboardLayout)/constant/sidebar-items";
+import { getSidebarData } from "@/src/constant/sidebar-items";
 
 // types
 type SidebarData = {
@@ -158,7 +158,6 @@ const DashbaordSidebar = ({
 
   return (
     <SidebarProvider className={cn(className)}>
-      
       <AppSidebar role={role} />
 
       <SidebarInset>

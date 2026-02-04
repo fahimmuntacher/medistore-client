@@ -22,7 +22,7 @@ export const getSidebarData = (role: string) => {
           {
             label: "Manage Users",
             icon: Users,
-            href: "/dashboard/users",
+            href: "/dashboard/admin/users",
           },
           {
             label: "All Orders",
@@ -66,7 +66,7 @@ export const getSidebarData = (role: string) => {
           {
             label: "My Order",
             icon: ListOrdered,
-            href: "/dashboard/my-orders",
+            href: "/dashboard/customer/my-orders",
           },
           {
             label: "Love",

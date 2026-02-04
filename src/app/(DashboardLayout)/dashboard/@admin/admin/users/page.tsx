@@ -3,7 +3,7 @@ import React from 'react';
 const page = () => {
     return (
         <div>
-            Admin users list
+            This is users for admin
         </div>
     );
 };
