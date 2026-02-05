@@ -14,7 +14,7 @@ export default function SellerDashboardPage() {
     const fetchSellerStats = async () => {
       try {
         setLoading(true);
-        // নিশ্চিত করুন আপনার ব্যাকএন্ডে এই রুটটি আছে
+        
         const response = await api.get("/dashboard/seller");
         setData(response.data);
       } catch (err) {
