@@ -6,6 +6,7 @@ import {
   Users,
   Store,
   ListOrdered,
+  LayoutGrid,
 } from "lucide-react";
 
 export const getSidebarData = (role: string) => {
@@ -20,14 +21,19 @@ export const getSidebarData = (role: string) => {
             href: "/dashboard",
           },
           {
-            label: "Manage Users",
+            label: "Users",
             icon: Users,
             href: "/dashboard/admin/users",
           },
           {
-            label: "All Orders",
+            label: "Orders",
             icon: ClipboardList,
             href: "/dashboard/admin/orders",
+          },
+          {
+            label: "Categories",
+            icon: LayoutGrid,
+            href: "/dashboard/admin/categories",
           },
         ],
       },
@@ -39,7 +45,7 @@ export const getSidebarData = (role: string) => {
           {
             label: "Dashboard",
             icon: LayoutDashboard,
-            href: "/dashboard/seller",
+            href: "/dashboard",
           },
           {
             label: "My Medicines",
@@ -47,9 +53,9 @@ export const getSidebarData = (role: string) => {
             href: "/dashboard/seller/medicines",
           },
           {
-            label: "Sales Report",
+            label: "Orders",
             icon: ClipboardList,
-            href: "/dashboard/seller/sales",
+            href: "/dashboard/seller/orders",
           },
         ],
       },
