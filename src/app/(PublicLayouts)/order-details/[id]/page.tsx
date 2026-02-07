@@ -88,7 +88,7 @@ const OrderDetailsPage = () => {
         </Button>
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight truncate">
-            Order #{order.id?.slice(0, 8).toUpperCase()}
+            Order #{order.id?.slice(-8).toUpperCase()}
           </h1>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />

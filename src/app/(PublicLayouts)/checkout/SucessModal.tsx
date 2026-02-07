@@ -33,7 +33,7 @@ const SucessModal = ({ orderId }: SuccessModalProps) => {
         <Button variant="outline" onClick={() => router.push("/medicines")}>
           Continue Shopping
         </Button>
-        <Button onClick={() => router.push("/orders")}>View My Orders</Button>
+        <Button onClick={() => router.push("/dashboard/orders")}>View My Orders</Button>
       </div>
     </div>
   );

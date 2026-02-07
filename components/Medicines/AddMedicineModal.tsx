@@ -55,7 +55,7 @@ export function AddMedicineModal({ trigger }: { trigger?: React.ReactNode }) {
     },
   });
 
-  // Cloudinary Upload Logic
+  // Cloudinary Upload 
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("image", file);
