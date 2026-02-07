@@ -95,7 +95,7 @@ export default function AdminOverviewUI({ data }: AdminOverviewUIProps) {
             className={cn(
               "relative overflow-hidden border shadow-sm transition-all",
               "hover:shadow-md hover:-translate-y-0.5",
-              "bg-gradient-to-br",
+              "bg-linear-to-br",
               stat.gradient,
             )}
           >
