@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { AddMedicineModal } from "../Medicines/AddMedicineModal";
 
 interface SellerOverviewUIProps {
   data: {
@@ -201,9 +202,13 @@ export default function SellerOverviewUI({ data }: SellerOverviewUIProps) {
             <p className="text-sm text-primary-foreground/70">
               Add new medicines to boost your sales.
             </p>
-            <button className="w-full bg-primary-foreground text-primary font-semibold py-2 rounded-md hover:bg-primary-muted transition-colors flex items-center justify-center gap-2">
-              Add Medicine <ArrowUpRight className="h-4 w-4" />
-            </button>
+            <AddMedicineModal
+              trigger={
+                <button className="w-full bg-primary-foreground text-primary font-semibold py-2 rounded-md hover:bg-primary-muted transition-colors flex items-center justify-center gap-2">
+                  Add Medicine <ArrowUpRight className="h-4 w-4" />
+                </button>
+              }
+            ></AddMedicineModal>
           </CardContent>
         </Card>
 

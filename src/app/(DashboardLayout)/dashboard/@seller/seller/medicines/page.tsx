@@ -24,15 +24,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Edit,
-  Package,
-  Search,
-  Pill,
-  Trash2, 
-} from "lucide-react";
+import { Loader2, Edit, Package, Search, Pill, Trash2, Plus } from "lucide-react";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
+import { AddMedicineModal } from "@/components/Medicines/AddMedicineModal";
 
 /* ---------------- API Functions ---------------- */
 const fetchSellerMedicines = async () => {
@@ -44,7 +38,6 @@ const updateMedicine = async ({ id, data }: { id: string; data: any }) => {
   const res = await api.put(`/medicines/${id}`, data);
   return res.data;
 };
-
 
 const deleteMedicine = async (id: string) => {
   const res = await api.delete(`/medicines/${id}`);
@@ -96,9 +89,7 @@ const SellerMedicinePage = () => {
     : [];
 
   if (isLoading) {
-    return (
-     <OrdersTableSkeleton></OrdersTableSkeleton>
-    );
+    return <OrdersTableSkeleton></OrdersTableSkeleton>;
   }
 
   return (
@@ -108,13 +99,26 @@ const SellerMedicinePage = () => {
         <h1 className="text-3xl font-bold tracking-tight">
           Medicine Inventory
         </h1>
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search medicine..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          {/* Search Box */}
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search medicine..."
+              className="pl-9"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Add Medicine Button inside Modal */}
+          <AddMedicineModal
+            trigger={
+              <Button className="w-full sm:w-auto gap-2">
+                <Plus className="h-4 w-4" /> Add Medicine
+              </Button>
+            }
           />
         </div>
       </div>
