@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/sidebar";
 import { generateBreadcrumbs } from "@/src/helpers/generateBreadcrumbs";
 import { getSidebarData } from "@/src/constant/sidebar-items";
+import { SidebarProfileCard } from "./SidebarProfileCardProps";
 
 // types
 type SidebarData = {
@@ -123,18 +124,24 @@ const AppSidebar = ({
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/dashboard/settings">
                   <Settings className="size-4" />
-                  <span>Settings</span>
+                  <span>My Profile</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+        </SidebarGroup>
+      </SidebarFooter> */}
+
+      <SidebarFooter>
+        <SidebarGroup>
+          <SidebarProfileCard />
         </SidebarGroup>
       </SidebarFooter>
       <SidebarRail />

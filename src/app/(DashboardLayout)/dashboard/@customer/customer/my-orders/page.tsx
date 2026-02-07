@@ -121,13 +121,14 @@ export default function CustomerOrder() {
                 {orders.map((order: any) => (
                   <TableRow
                     key={order.id}
-                    className="hover:bg-muted/20 transition-colors"
+                    className="hover:bg-muted/20 transition-colors cursor-pointer"
+                    onClick={() => {
+                      window.location.href = `/order-details/${order.id}`;
+                    }}
                   >
-                    <Link  href={`/order-details/${order.id}`} >
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        #{order.id.slice(0, 8)}
-                      </TableCell>
-                    </Link>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      #{order.id.slice(0, 8)}
+                    </TableCell>
 
                     <TableCell>
                       <div className="space-y-1">
@@ -160,7 +161,10 @@ export default function CustomerOrder() {
                       ৳{order.totalAmount}
                     </TableCell>
 
-                    <TableCell className="text-right">
+                    <TableCell
+                      className="text-right"
+                      onClick={(e) => e.stopPropagation()} // ⛔ prevent row click
+                    >
                       {order.status === "PLACED" ? (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>

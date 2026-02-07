@@ -82,7 +82,7 @@ const OrderDetailsPage = () => {
           asChild
           className="rounded-full h-9 w-9 shrink-0"
         >
-          <Link href="/dashboard/orders">
+          <Link href="/dashboard/customer/my-orders">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
