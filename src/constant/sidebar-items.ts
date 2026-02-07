@@ -74,11 +74,11 @@ export const getSidebarData = (role: string) => {
             icon: ListOrdered,
             href: "/dashboard/customer/my-orders",
           },
-          {
-            label: "Love",
-            icon: ClipboardList,
-            href: "/dashboard/customer/prescriptions",
-          },
+          // {
+          //   label: "Love",
+          //   icon: ClipboardList,
+          //   href: "/dashboard/customer/prescriptions",
+          // },
         ],
       },
     ],

@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import api from "@/lib/axios";
 import { PaginationControls } from "@/components/Medicines/PaginationControls";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
+import Link from "next/link";
 
 /* ---------------- API ---------------- */
 
@@ -59,7 +60,7 @@ export default function CustomerOrder() {
 
   const orders = data?.orders ?? [];
   const meta = data?.meta || { page: 1, totalPage: 1, total: 0 };
-//   console.log(meta);
+  //   console.log(meta);
 
   const { mutate: cancel, isPending } = useMutation({
     mutationFn: cancelOrder,
@@ -76,9 +77,7 @@ export default function CustomerOrder() {
   });
 
   if (isLoading && !data) {
-    return (
-      <OrdersTableSkeleton></OrdersTableSkeleton>
-    );
+    return <OrdersTableSkeleton></OrdersTableSkeleton>;
   }
 
   return (
@@ -124,9 +123,11 @@ export default function CustomerOrder() {
                     key={order.id}
                     className="hover:bg-muted/20 transition-colors"
                   >
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      #{order.id.slice(0, 8)}
-                    </TableCell>
+                    <Link  href={`/order-details/${order.id}`} >
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        #{order.id.slice(0, 8)}
+                      </TableCell>
+                    </Link>
 
                     <TableCell>
                       <div className="space-y-1">
