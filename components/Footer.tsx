@@ -31,7 +31,7 @@ const Footer = ({
   logo = {
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg",
     alt: "blocks for shadcn/ui",
-    title: "Shadcnblocks.com",
+    title: "Medistore",
     url: "https://www.shadcnblocks.com",
   },
   className,

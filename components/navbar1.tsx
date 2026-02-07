@@ -68,8 +68,8 @@ const Navbar1 = async ({
   logo = {
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
-    alt: "logo",
-    title: "Shadcnblocks.com",
+    alt: "Medistore",
+    title: "Medistore",
   },
   menu = [
     { title: "Home", url: "/" },

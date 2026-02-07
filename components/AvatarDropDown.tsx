@@ -61,12 +61,11 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
                 My Profile
               </Link>
             </DropdownMenuItem>
-           
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
-            variant="destructive"
+              variant="destructive"
               className="text-destructive  cursor-pointer"
               onSelect={() => setShowSignOutDialog(true)}
             >
