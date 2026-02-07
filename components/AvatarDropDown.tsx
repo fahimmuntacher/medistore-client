@@ -57,15 +57,11 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/billing" className="cursor-pointer">
-                Billing
+              <Link href="/my-profile" className="cursor-pointer">
+                My Profile
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard" className="cursor-pointer">
-                Settings
-              </Link>
-            </DropdownMenuItem>
+           
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
