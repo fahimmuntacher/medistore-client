@@ -68,10 +68,12 @@ const SellerMedicinePage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
+
   // get medicine
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["seller-medicines", page, searchTerm],
     queryFn: () => fetchSellerMedicines(page, searchTerm),
+    
   });
   const medicines = data?.medicines ?? [];
 
@@ -105,13 +107,7 @@ const SellerMedicinePage = () => {
       toast.error(err.response?.data?.error || "Delete failed"),
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-8 min-h-screen flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+ 
 
   return (
     <div className="p-4 md:p-8 space-y-6 text-foreground">
@@ -126,7 +122,7 @@ const SellerMedicinePage = () => {
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              disabled={isFetching}
+              
               placeholder="Search medicine..."
               className="pl-9"
               value={searchTerm}
@@ -160,7 +156,7 @@ const SellerMedicinePage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isFetching ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={4}>
                   <OrdersTableSkeleton />

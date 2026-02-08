@@ -73,7 +73,7 @@ const SellerOrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["seller-orders", page, searchTerm],
     queryFn: () => fetchSellerOrders(page, searchTerm),
   });
@@ -115,13 +115,7 @@ const SellerOrdersPage = () => {
 
   console.log(orders);
 
-  if (isLoading) {
-    return (
-      <div className="p-8 min-h-screen flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -160,7 +154,7 @@ const SellerOrdersPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isFetching ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={4}>
                   <OrdersTableSkeleton />
@@ -216,78 +210,77 @@ const SellerOrdersPage = () => {
 
                           <div className="space-y-6 pt-4">
                             {/* Shipping Section */}
-                            <div className="bg-muted/40 p-4 rounded-lg border border-dashed">
-                              <h4 className="flex items-center gap-2 font-semibold mb-3 text-sm border-b pb-2">
-                                <MapPin className="h-4 w-4 text-red-500" />{" "}
-                                Delivery Address
-                              </h4>
-                              <div className="space-y-1 text-sm">
-                                <p className="font-bold text-base text-foreground">
-                                  {order.shippingAddress?.fullName}
-                                </p>
-                                <p className="text-muted-foreground">
-                                  {order.shippingAddress?.details}
-                                </p>
-                                <p className="text-muted-foreground">
-                                  {order.shippingAddress?.area},{" "}
-                                  {order.shippingAddress?.city}
-                                </p>
-                                <p className="flex items-center gap-2 pt-2 font-semibold">
-                                  <Phone className="h-3 w-3 text-primary" />{" "}
-                                  {order.shippingAddress?.phone}
-                                </p>
-                              </div>
-                            </div>
 
-                            {/* Payment & Items */}
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="p-3 border rounded-md">
-                                <p className="text-[10px] uppercase text-muted-foreground">
-                                  Payment Method
-                                </p>
-                                <p className="text-sm font-medium flex items-center gap-2 mt-1">
-                                  <CreditCard className="h-4 w-4" />{" "}
-                                  {order.paymentMethod}
-                                </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                                <h4 className="flex items-center gap-2 font-bold text-sm mb-3 text-slate-700">
+                                  <MapPin className="h-4 w-4 text-red-500" />{" "}
+                                  Delivery Address
+                                </h4>
+                                <div className="space-y-1 text-sm">
+                                  <p className="font-semibold text-slate-800">
+                                    {order.shippingAddress?.fullName}
+                                  </p>
+                                  <p className="text-slate-600">
+                                    {order.shippingAddress?.details}
+                                  </p>
+                                  <p className="text-slate-600">
+                                    {order.shippingAddress?.area},{" "}
+                                    {order.shippingAddress?.city}
+                                  </p>
+                                  <p className="flex items-center gap-2 mt-2 font-medium text-primary">
+                                    <Phone className="h-3 w-3" />{" "}
+                                    {order.shippingAddress?.phone}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="p-3 border rounded-md">
-                                <p className="text-[10px] uppercase text-muted-foreground">
-                                  Total Price
-                                </p>
-                                <p className="text-sm font-bold text-primary mt-1">
-                                  ৳{order.totalAmount}
-                                </p>
-                              </div>
-                            </div>
-                            {/* Ordered Medicines */}
-                            <div className="bg-muted/40 p-4 rounded-lg border border-dashed">
-                              <h4 className="flex items-center gap-2 font-semibold mb-3 text-sm border-b pb-2">
-                                <Pill className="h-4 w-4 text-primary" />
-                                Ordered Medicines
-                              </h4>
 
                               <div className="space-y-3">
+                                <div className="p-3 border rounded-md">
+                                  <p className="text-[10px] uppercase font-bold text-muted-foreground">
+                                    Payment Method
+                                  </p>
+                                  <p className="text-sm font-medium flex items-center gap-2 mt-1 uppercase">
+                                    <CreditCard className="h-4 w-4 text-slate-500" />{" "}
+                                    {order.paymentMethod}
+                                  </p>
+                                </div>
+                                <div className="p-3 border rounded-md bg-primary/5">
+                                  <p className="text-[10px] uppercase font-bold text-muted-foreground">
+                                    Total Paid
+                                  </p>
+                                  <p className="text-lg font-bold text-primary mt-1">
+                                    ৳{order.totalAmount}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Ordered Items */}
+                            <div className="space-y-3">
+                              <h4 className="flex items-center gap-2 font-bold text-sm text-slate-700">
+                                <Pill className="h-4 w-4 text-blue-500" />{" "}
+                                Medicines List
+                              </h4>
+                              <div className="space-y-2">
                                 {order.items?.map((item: any) => (
                                   <div
                                     key={item.id}
-                                    className="flex items-center justify-between text-sm bg-background p-3 rounded-md border"
+                                    className="flex items-center justify-between p-3 rounded-lg border bg-white shadow-sm"
                                   >
-                                    {/* Medicine Info */}
                                     <div className="flex flex-col">
-                                      <span className="font-semibold">
+                                      <span className="text-sm font-bold text-slate-800">
                                         {item.medicine?.name}
                                       </span>
-                                      <span className="text-xs text-muted-foreground">
+                                      <span className="text-[11px] text-muted-foreground uppercase">
                                         {item.medicine?.manufacturer}
                                       </span>
                                     </div>
-
-                                    {/* Quantity & Price */}
                                     <div className="text-right">
-                                      <p className="text-xs text-muted-foreground">
+                                      <p className="text-xs font-medium text-slate-500">
                                         Qty: {item.quantity}
                                       </p>
-                                      <p className="font-semibold text-primary">
+                                      <p className="font-bold text-primary">
                                         ৳{item.price * item.quantity}
                                       </p>
                                     </div>
@@ -370,7 +363,7 @@ const SellerOrdersPage = () => {
           </TableBody>
         </Table>
       </div>
-      
+
       <PaginationControls
         currentPage={pagination.page}
         totalPages={pagination.totalPages}

@@ -39,7 +39,7 @@ const fetchOrders = async (page: number) => {
       limit: 10,
     },
   });
-  console.log(res.data);
+  // console.log(res.data);
   return res.data.data;
 };
 
@@ -53,7 +53,7 @@ export default function CustomerOrder() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["my-orders", page],
     queryFn: () => fetchOrders(page),
   });
@@ -79,10 +79,13 @@ export default function CustomerOrder() {
     },
   });
 
-  if (isLoading && !data) {
-    return <OrdersTableSkeleton></OrdersTableSkeleton>;
+  if (isLoading) {
+    return (
+      <div className="p-8 min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
-
   return (
     <div className="md:p-8 min-h-screen space-y-8">
       {/* Header */}
@@ -121,96 +124,106 @@ export default function CustomerOrder() {
               </TableHeader>
 
               <TableBody>
-                {orders.map((order: any) => (
-                  <TableRow
-                    key={order.id}
-                    className="hover:bg-muted/20 transition-colors cursor-pointer"
-                    onClick={() => {
-                      window.location.href = `/order-details/${order.id}`;
-                    }}
-                  >
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      #{order.id.slice(-8)}
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="font-medium">
-                          {order.items[0]?.medicine?.name || "Medicine Item"}
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge
-                        variant={
-                          order.status === "DELIVERED"
-                            ? "default"
-                            : order.status === "CANCELLED"
-                              ? "destructive"
-                              : "secondary"
-                        }
-                        className="capitalize"
-                      >
-                        {order.status.toLowerCase()}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="font-semibold">
-                      ৳{order.totalAmount}
-                    </TableCell>
-
-                    <TableCell
-                      className="text-right"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {order.status === "PLACED" ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive"
-                            >
-                              <Ban className="h-4 w-4 mr-1" />
-                              Cancel
-                            </Button>
-                          </AlertDialogTrigger>
-
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Cancel this order?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Keep Order</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => cancel(order.id)}
-                                disabled={isPending}
-                              >
-                                {isPending && (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                )}
-                                Yes, cancel
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
-                        <Info className="h-4 w-4 text-muted-foreground inline" />
-                      )}
+                {isFetching ? (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <OrdersTableSkeleton />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  orders.map((order: any) => (
+                    <TableRow
+                      key={order.id}
+                      className="hover:bg-muted/20 transition-colors cursor-pointer"
+                      onClick={() => {
+                        window.location.href = `/order-details/${order.id}`;
+                      }}
+                    >
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        #{order.id.slice(-8)}
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-medium">
+                            {order.items[0]?.medicine?.name || "Medicine Item"}
+                          </p>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge
+                          variant={
+                            order.status === "DELIVERED"
+                              ? "default"
+                              : order.status === "CANCELLED"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                          className="capitalize"
+                        >
+                          {order.status.toLowerCase()}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="font-semibold">
+                        ৳{order.totalAmount}
+                      </TableCell>
+
+                      <TableCell
+                        className="text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {order.status === "PLACED" ? (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive"
+                              >
+                                <Ban className="h-4 w-4 mr-1" />
+                                Cancel
+                              </Button>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Cancel this order?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  Keep Order
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => cancel(order.id)}
+                                  disabled={isPending}
+                                >
+                                  {isPending && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  )}
+                                  Yes, cancel
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        ) : (
+                          <Info className="h-4 w-4 text-muted-foreground inline" />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

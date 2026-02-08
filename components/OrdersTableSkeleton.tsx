@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function OrdersTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="rounded-xl  bg-card overflow-x-auto">
-      <Table className="min-w-[720px]">
+      <Table className="w-full">
         {/* <TableHeader>
           <TableRow className="bg-muted/40">
             <TableHead>Order ID</TableHead>

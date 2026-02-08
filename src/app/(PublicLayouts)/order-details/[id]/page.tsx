@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import {
@@ -27,7 +27,7 @@ const fetchOrderDetails = async (id: string) => {
 const OrderDetailsPage = () => {
   const params = useParams();
   const orderId = params.id as string;
-
+  const router = useRouter();
   const {
     data: order,
     isLoading,
@@ -66,7 +66,7 @@ const OrderDetailsPage = () => {
           The order you're looking for doesn't exist or you don't have access.
         </p>
         <Button asChild>
-          <Link href="/dashboard/orders">Back to Orders</Link>
+          <Link href="/dashboard">Back to Dashboard</Link>
         </Button>
       </div>
     );
@@ -82,9 +82,9 @@ const OrderDetailsPage = () => {
           asChild
           className="rounded-full h-9 w-9 shrink-0"
         >
-          <Link href="/dashboard/customer/my-orders">
+          <button onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
-          </Link>
+          </button>
         </Button>
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight truncate">
