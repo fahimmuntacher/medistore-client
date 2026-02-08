@@ -40,11 +40,19 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
+import { PaginationControls } from "@/components/Medicines/PaginationControls";
 
 /* ---------------- API Functions ---------------- */
-const fetchSellerOrders = async (search: string) => {
-  const res = await api.get("/orders", { params: { search } });
-  return res.data.data.orders;
+const fetchSellerOrders = async (page: number, search: string) => {
+  const res = await api.get("/orders", {
+    params: {
+      page,
+      limit: 10,
+      search,
+    },
+  });
+
+  return res.data.data;
 };
 
 const updateOrderStatus = async ({
@@ -61,10 +69,11 @@ const updateOrderStatus = async ({
 const SellerOrdersPage = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
 
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ["seller-orders", searchTerm],
-    queryFn: () => fetchSellerOrders(searchTerm),
+  const { data, isLoading } = useQuery({
+    queryKey: ["seller-orders", page, searchTerm],
+    queryFn: () => fetchSellerOrders(page, searchTerm),
   });
 
   const { mutate: handleStatusUpdate, isPending: isUpdating } = useMutation({
@@ -76,6 +85,14 @@ const SellerOrdersPage = () => {
     onError: (err: any) =>
       toast.error(err.response?.data?.error || "Failed to update"),
   });
+
+  const orders = data?.orders ?? [];
+
+  const pagination = data?.pagination || {
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -112,7 +129,10 @@ const SellerOrdersPage = () => {
             placeholder="Search Order ID..."
             className="pl-9"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
@@ -294,6 +314,15 @@ const SellerOrdersPage = () => {
           </TableBody>
         </Table>
       </div>
+      <PaginationControls
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        onPageChange={(newPage: number) => {
+          if (!isLoading && newPage !== page) {
+            setPage(newPage);
+          }
+        }}
+      />
     </div>
   );
 };

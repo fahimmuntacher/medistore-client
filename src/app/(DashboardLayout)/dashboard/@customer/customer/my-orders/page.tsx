@@ -26,9 +26,9 @@ import { Loader2, Ban, Package, Calendar, Info } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import api from "@/lib/axios";
-import { PaginationControls } from "@/components/Medicines/PaginationControls";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
 import Link from "next/link";
+import { PaginationControls } from "@/components/Medicines/PaginationControls";
 
 /* ---------------- API ---------------- */
 
@@ -39,6 +39,7 @@ const fetchOrders = async (page: number) => {
       limit: 10,
     },
   });
+  console.log(res.data);
   return res.data.data;
 };
 
@@ -55,12 +56,14 @@ export default function CustomerOrder() {
   const { data, isLoading } = useQuery({
     queryKey: ["my-orders", page],
     queryFn: () => fetchOrders(page),
-    // keepPreviousData: true,
   });
 
   const orders = data?.orders ?? [];
-  const meta = data?.meta || { page: 1, totalPage: 1, total: 0 };
-  //   console.log(meta);
+  const pagination = data?.pagination || {
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  };
 
   const { mutate: cancel, isPending } = useMutation({
     mutationFn: cancelOrder,
@@ -127,7 +130,7 @@ export default function CustomerOrder() {
                     }}
                   >
                     <TableCell className="font-mono text-xs text-muted-foreground">
-                      #{order.id.slice(0, 8)}
+                      #{order.id.slice(-8)}
                     </TableCell>
 
                     <TableCell>
@@ -163,7 +166,7 @@ export default function CustomerOrder() {
 
                     <TableCell
                       className="text-right"
-                      onClick={(e) => e.stopPropagation()} // ⛔ prevent row click
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {order.status === "PLACED" ? (
                         <AlertDialog>
@@ -214,9 +217,9 @@ export default function CustomerOrder() {
 
           {/* Pagination */}
           <PaginationControls
-            currentPage={meta.page}
-            totalPages={meta.totalPage}
-            onPageChange={(newPage: any) => {
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(newPage: number) => {
               if (!isLoading && newPage !== page) {
                 setPage(newPage);
               }
