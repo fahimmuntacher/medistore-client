@@ -37,6 +37,8 @@ import {
   CreditCard,
   User,
   Package,
+  Loader2,
+  Pill,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
@@ -71,7 +73,7 @@ const SellerOrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["seller-orders", page, searchTerm],
     queryFn: () => fetchSellerOrders(page, searchTerm),
   });
@@ -111,7 +113,15 @@ const SellerOrdersPage = () => {
     }
   };
 
-  if (isLoading) return <OrdersTableSkeleton />;
+  console.log(orders);
+
+  if (isLoading) {
+    return (
+      <div className="p-8 min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -150,170 +160,217 @@ const SellerOrdersPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders?.map((order: any) => (
-              <TableRow key={order.id}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium uppercase font-mono text-primary">
-                      #{order.id.slice(-8)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Intl.DateTimeFormat("en-GB").format(
-                        new Date(order.createdAt),
-                      )}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm font-medium">
-                  {order.customer?.name}
-                </TableCell>
-                <TableCell className="font-bold">
-                  ৳{order.totalAmount}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    className={`${getStatusColor(order.status)} border-none shadow-none`}
-                  >
-                    {order.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    {/* --- DETAILS MODAL START --- */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-2 text-primary hover:text-primary hover:bg-primary/10"
-                        >
-                          <Eye className="h-4 w-4" /> Details
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                          <DialogTitle className="flex items-center gap-2">
-                            <Package className="h-5 w-5" /> Order Summary
-                          </DialogTitle>
-                        </DialogHeader>
-
-                        <div className="space-y-6 pt-4">
-                          {/* Shipping Section */}
-                          <div className="bg-muted/40 p-4 rounded-lg border border-dashed">
-                            <h4 className="flex items-center gap-2 font-semibold mb-3 text-sm border-b pb-2">
-                              <MapPin className="h-4 w-4 text-red-500" />{" "}
-                              Delivery Address
-                            </h4>
-                            <div className="space-y-1 text-sm">
-                              <p className="font-bold text-base text-foreground">
-                                {order.shippingAddress?.fullName}
-                              </p>
-                              <p className="text-muted-foreground">
-                                {order.shippingAddress?.details}
-                              </p>
-                              <p className="text-muted-foreground">
-                                {order.shippingAddress?.area},{" "}
-                                {order.shippingAddress?.city}
-                              </p>
-                              <p className="flex items-center gap-2 pt-2 font-semibold">
-                                <Phone className="h-3 w-3 text-primary" />{" "}
-                                {order.shippingAddress?.phone}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Payment & Items */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 border rounded-md">
-                              <p className="text-[10px] uppercase text-muted-foreground">
-                                Payment Method
-                              </p>
-                              <p className="text-sm font-medium flex items-center gap-2 mt-1">
-                                <CreditCard className="h-4 w-4" />{" "}
-                                {order.paymentMethod}
-                              </p>
-                            </div>
-                            <div className="p-3 border rounded-md">
-                              <p className="text-[10px] uppercase text-muted-foreground">
-                                Total Price
-                              </p>
-                              <p className="text-sm font-bold text-primary mt-1">
-                                ৳{order.totalAmount}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Inline Update inside Modal */}
-                          <div className="pt-4 border-t">
-                            <p className="text-sm font-semibold mb-2">
-                              Change Status
-                            </p>
-                            <Select
-                              defaultValue={order.status}
-                              onValueChange={(val) =>
-                                handleStatusUpdate({
-                                  id: order.id,
-                                  status: val,
-                                })
-                              }
-                              disabled={
-                                order.status === "CANCELLED" ||
-                                order.status === "DELIVERED" ||
-                                isUpdating
-                              }
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="PLACED">Placed</SelectItem>
-                                <SelectItem value="PROCESSING">
-                                  Processing
-                                </SelectItem>
-                                <SelectItem value="SHIPPED">Shipped</SelectItem>
-                                <SelectItem value="DELIVERED">
-                                  Delivered
-                                </SelectItem>
-                                <SelectItem value="CANCELLED">
-                                  Cancel Order
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    {/* --- DETAILS MODAL END --- */}
-
-                    <Select
-                      defaultValue={order.status}
-                      onValueChange={(val) =>
-                        handleStatusUpdate({ id: order.id, status: val })
-                      }
-                      disabled={
-                        order.status === "CANCELLED" ||
-                        order.status === "DELIVERED" ||
-                        isUpdating
-                      }
-                    >
-                      <SelectTrigger className="w-[120px] h-8 text-[11px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PLACED">Placed</SelectItem>
-                        <SelectItem value="PROCESSING">Processing</SelectItem>
-                        <SelectItem value="SHIPPED">Shipped</SelectItem>
-                        <SelectItem value="DELIVERED">Delivered</SelectItem>
-                        <SelectItem value="CANCELLED">Cancel</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            {isFetching ? (
+              <TableRow>
+                <TableCell colSpan={4}>
+                  <OrdersTableSkeleton />
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              orders?.map((order: any) => (
+                <TableRow key={order.id}>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium uppercase font-mono text-primary">
+                        #{order.id.slice(-8)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Intl.DateTimeFormat("en-GB").format(
+                          new Date(order.createdAt),
+                        )}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm font-medium">
+                    {order.customer?.name}
+                  </TableCell>
+                  <TableCell className="font-bold">
+                    ৳{order.totalAmount}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`${getStatusColor(order.status)} border-none shadow-none`}
+                    >
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      {/* --- DETAILS MODAL START --- */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2 text-primary hover:text-primary hover:bg-primary/10"
+                          >
+                            <Eye className="h-4 w-4" /> Details
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[500px]">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <Package className="h-5 w-5" /> Order Summary
+                            </DialogTitle>
+                          </DialogHeader>
+
+                          <div className="space-y-6 pt-4">
+                            {/* Shipping Section */}
+                            <div className="bg-muted/40 p-4 rounded-lg border border-dashed">
+                              <h4 className="flex items-center gap-2 font-semibold mb-3 text-sm border-b pb-2">
+                                <MapPin className="h-4 w-4 text-red-500" />{" "}
+                                Delivery Address
+                              </h4>
+                              <div className="space-y-1 text-sm">
+                                <p className="font-bold text-base text-foreground">
+                                  {order.shippingAddress?.fullName}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  {order.shippingAddress?.details}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  {order.shippingAddress?.area},{" "}
+                                  {order.shippingAddress?.city}
+                                </p>
+                                <p className="flex items-center gap-2 pt-2 font-semibold">
+                                  <Phone className="h-3 w-3 text-primary" />{" "}
+                                  {order.shippingAddress?.phone}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Payment & Items */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="p-3 border rounded-md">
+                                <p className="text-[10px] uppercase text-muted-foreground">
+                                  Payment Method
+                                </p>
+                                <p className="text-sm font-medium flex items-center gap-2 mt-1">
+                                  <CreditCard className="h-4 w-4" />{" "}
+                                  {order.paymentMethod}
+                                </p>
+                              </div>
+                              <div className="p-3 border rounded-md">
+                                <p className="text-[10px] uppercase text-muted-foreground">
+                                  Total Price
+                                </p>
+                                <p className="text-sm font-bold text-primary mt-1">
+                                  ৳{order.totalAmount}
+                                </p>
+                              </div>
+                            </div>
+                            {/* Ordered Medicines */}
+                            <div className="bg-muted/40 p-4 rounded-lg border border-dashed">
+                              <h4 className="flex items-center gap-2 font-semibold mb-3 text-sm border-b pb-2">
+                                <Pill className="h-4 w-4 text-primary" />
+                                Ordered Medicines
+                              </h4>
+
+                              <div className="space-y-3">
+                                {order.items?.map((item: any) => (
+                                  <div
+                                    key={item.id}
+                                    className="flex items-center justify-between text-sm bg-background p-3 rounded-md border"
+                                  >
+                                    {/* Medicine Info */}
+                                    <div className="flex flex-col">
+                                      <span className="font-semibold">
+                                        {item.medicine?.name}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {item.medicine?.manufacturer}
+                                      </span>
+                                    </div>
+
+                                    {/* Quantity & Price */}
+                                    <div className="text-right">
+                                      <p className="text-xs text-muted-foreground">
+                                        Qty: {item.quantity}
+                                      </p>
+                                      <p className="font-semibold text-primary">
+                                        ৳{item.price * item.quantity}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Inline Update inside Modal */}
+                            <div className="pt-4 border-t">
+                              <p className="text-sm font-semibold mb-2">
+                                Change Status
+                              </p>
+                              <Select
+                                defaultValue={order.status}
+                                onValueChange={(val) =>
+                                  handleStatusUpdate({
+                                    id: order.id,
+                                    status: val,
+                                  })
+                                }
+                                disabled={
+                                  order.status === "CANCELLED" ||
+                                  order.status === "DELIVERED" ||
+                                  isUpdating
+                                }
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="PLACED">Placed</SelectItem>
+                                  <SelectItem value="PROCESSING">
+                                    Processing
+                                  </SelectItem>
+                                  <SelectItem value="SHIPPED">
+                                    Shipped
+                                  </SelectItem>
+                                  <SelectItem value="DELIVERED">
+                                    Delivered
+                                  </SelectItem>
+                                  <SelectItem value="CANCELLED">
+                                    Cancel Order
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      {/* --- DETAILS MODAL END --- */}
+
+                      <Select
+                        defaultValue={order.status}
+                        onValueChange={(val) =>
+                          handleStatusUpdate({ id: order.id, status: val })
+                        }
+                        disabled={
+                          order.status === "CANCELLED" ||
+                          order.status === "DELIVERED" ||
+                          isUpdating
+                        }
+                      >
+                        <SelectTrigger className="w-[120px] h-8 text-[11px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PLACED">Placed</SelectItem>
+                          <SelectItem value="PROCESSING">Processing</SelectItem>
+                          <SelectItem value="SHIPPED">Shipped</SelectItem>
+                          <SelectItem value="DELIVERED">Delivered</SelectItem>
+                          <SelectItem value="CANCELLED">Cancel</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
+      
       <PaginationControls
         currentPage={pagination.page}
         totalPages={pagination.totalPages}

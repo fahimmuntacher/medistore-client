@@ -12,9 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function OrdersTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
+    <div className="rounded-xl  bg-card overflow-x-auto">
       <Table className="min-w-[720px]">
-        <TableHeader>
+        {/* <TableHeader>
           <TableRow className="bg-muted/40">
             <TableHead>Order ID</TableHead>
             <TableHead>Product</TableHead>
@@ -22,7 +22,7 @@ export function OrdersTableSkeleton({ rows = 5 }: { rows?: number }) {
             <TableHead>Amount</TableHead>
             <TableHead className="text-right">Action</TableHead>
           </TableRow>
-        </TableHeader>
+        </TableHeader> */}
 
         <TableBody>
           {Array.from({ length: rows }).map((_, i) => (

@@ -24,14 +24,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Edit, Package, Search, Pill, Trash2, Plus } from "lucide-react";
+import {
+  Loader2,
+  Edit,
+  Package,
+  Search,
+  Pill,
+  Trash2,
+  Plus,
+} from "lucide-react";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
 import { AddMedicineModal } from "@/components/Medicines/AddMedicineModal";
+import { PaginationControls } from "@/components/Medicines/PaginationControls";
 
 /* ---------------- API Functions ---------------- */
-const fetchSellerMedicines = async () => {
-  const res = await api.get("/medicines/seller");
-  return res.data.medicines || res.data;
+const fetchSellerMedicines = async (page: number, search: string) => {
+  const res = await api.get("/medicines/seller", {
+    params: {
+      page,
+      limit: 10,
+      search,
+    },
+  });
+  // console.log(res.data);
+  return res.data;
 };
 
 const updateMedicine = async ({ id, data }: { id: string; data: any }) => {
@@ -51,12 +67,19 @@ const SellerMedicinePage = () => {
   const [selectedMedicine, setSelectedMedicine] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
+  const [page, setPage] = useState(1);
   // get medicine
-  const { data: medicines, isLoading } = useQuery({
-    queryKey: ["seller-medicines"],
-    queryFn: fetchSellerMedicines,
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["seller-medicines", page, searchTerm],
+    queryFn: () => fetchSellerMedicines(page, searchTerm),
   });
+  const medicines = data?.medicines ?? [];
+
+  const pagination = data?.pagination ?? {
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  };
 
   // update
   const { mutate: handleUpdate, isPending: isUpdating } = useMutation({
@@ -82,14 +105,12 @@ const SellerMedicinePage = () => {
       toast.error(err.response?.data?.error || "Delete failed"),
   });
 
-  const filteredMedicines = Array.isArray(medicines)
-    ? medicines.filter((med: any) =>
-        med.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : [];
-
   if (isLoading) {
-    return <OrdersTableSkeleton></OrdersTableSkeleton>;
+    return (
+      <div className="p-8 min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   return (
@@ -105,10 +126,14 @@ const SellerMedicinePage = () => {
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              disabled={isFetching}
               placeholder="Search medicine..."
               className="pl-9"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
 
@@ -135,58 +160,66 @@ const SellerMedicinePage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredMedicines.map((med: any) => (
-              <TableRow key={med.id} className="hover:bg-muted/30">
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-10 w-10 rounded overflow-hidden border">
-                      {med.image ? (
-                        <Image
-                          src={med.image}
-                          alt={med.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <Pill className="h-full w-full p-2 text-muted-foreground" />
-                      )}
-                    </div>
-                    <span className="font-semibold">{med.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell>৳{med.price}</TableCell>
-                <TableCell>
-                  <Badge variant={med.stock > 10 ? "outline" : "destructive"}>
-                    {med.stock}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        setSelectedMedicine(med);
-                        setIsEditDialogOpen(true);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => {
-                        setSelectedMedicine(med);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {isFetching ? (
+              <TableRow>
+                <TableCell colSpan={4}>
+                  <OrdersTableSkeleton />
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              medicines.map((med: any) => (
+                <TableRow key={med.id} className="hover:bg-muted/30">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 rounded overflow-hidden border">
+                        {med.image ? (
+                          <Image
+                            src={med.image}
+                            alt={med.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <Pill className="h-full w-full p-2 text-muted-foreground" />
+                        )}
+                      </div>
+                      <span className="font-semibold">{med.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>৳{med.price}</TableCell>
+                  <TableCell>
+                    <Badge variant={med.stock > 10 ? "outline" : "destructive"}>
+                      {med.stock}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedMedicine(med);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          setSelectedMedicine(med);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -262,6 +295,16 @@ const SellerMedicinePage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <PaginationControls
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        onPageChange={(newPage: number) => {
+          if (!isLoading && newPage !== page) {
+            setPage(newPage);
+          }
+        }}
+      />
     </div>
   );
 };
