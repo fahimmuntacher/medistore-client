@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { UserDetailsModal } from "@/components/UserDetailsModal";
 
 const AdminUserPage = () => {
   const queryClient = useQueryClient();
@@ -53,6 +54,8 @@ const AdminUserPage = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const [debouncedSearch] = useDebounce(search, 1000);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["users", debouncedSearch, role],
@@ -99,6 +102,10 @@ const AdminUserPage = () => {
     setIsAlertOpen(true);
   };
 
+  const handleOpenDetails = (userId: string) => {
+    setViewingUserId(userId);
+    setIsDetailsOpen(true);
+  };
   return (
     <div className="p-4 md:p-8 space-y-6">
       <div className="flex justify-between items-center">
@@ -201,9 +208,13 @@ const AdminUserPage = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem className="cursor-pointer">
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => handleOpenDetails(user.id)}
+                          >
                             <Eye className="mr-2 h-4 w-4" /> View Details
                           </DropdownMenuItem>
+
                           <DropdownMenuSeparator />
 
                           {/* Dynamic button*/}
@@ -268,6 +279,11 @@ const AdminUserPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <UserDetailsModal
+        isOpen={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        userId={viewingUserId}
+      />
     </div>
   );
 };
