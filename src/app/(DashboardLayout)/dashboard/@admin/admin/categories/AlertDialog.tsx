@@ -26,7 +26,7 @@ export const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading, title 
           <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
-              e.preventDefault();
+              // e.preventDefault();
               onConfirm();
             }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
