@@ -31,9 +31,6 @@ import { getCurrentUser } from "@/lib/get-user";
 import { AvatarDropdown } from "./AvatarDropDown";
 import { CartDrawer } from "./CartDrawer";
 
-
-
-
 interface MenuItem {
   title: string;
   url: string;
@@ -144,7 +141,7 @@ const Navbar1 = async ({
               <CartDrawer></CartDrawer>
               <ModeToggle />
               {user ? (
-                <AvatarDropdown user={user}/>
+                <AvatarDropdown user={user} />
               ) : (
                 <>
                   <Button asChild variant="outline" size="sm">

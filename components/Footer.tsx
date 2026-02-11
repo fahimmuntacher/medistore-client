@@ -30,12 +30,12 @@ interface Footer2Props {
 const Footer = ({
   logo = {
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg",
-    alt: "blocks for shadcn/ui",
+    alt: "blocks    for shadcn/ui",
     title: "Medistore",
     url: "https://www.shadcnblocks.com",
   },
   className,
-  tagline = "Components made easy.",
+  tagline = "Your Health, Our Priority. Discover Medistore",
   menuItems = [
     {
       title: "Product",

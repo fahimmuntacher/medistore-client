@@ -5,11 +5,10 @@ import {
   Card,
   CardContent,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Star, Eye, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { getEffectivePrice } from "@/lib/etEffectivePrice";
 import { useCartStore } from "@/src/app/store/CartStore";
@@ -18,23 +17,21 @@ import { Medicine } from "@/src/types/medicine";
 
 export function MedicineCard({ medicine }: { medicine: Medicine }) {
   const { isLoggedIn } = useAuth();
-  // const addToCart = useCartStore(s => s.add)
-
   const [adding, setAdding] = useState(false);
-  const [added, setAdded] = useState(false);
+  const { addItem, loading: cartLoading } = useCartStore();
 
   const effectivePrice = getEffectivePrice(medicine);
-  // console.log("effective price", effectivePrice);
   const hasDiscount = effectivePrice < medicine.price;
   const outOfStock = medicine.stock === 0;
+
   const rating =
     medicine.reviews.length > 0
       ? medicine.reviews.reduce((s, r) => s + r.rating, 0) /
         medicine.reviews.length
       : 0;
-  const { addItem, loading: cartLoading } = useCartStore();
 
-  const handleAdd = async () => {
+  const handleAdd = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (outOfStock || cartLoading) return;
     setAdding(true);
     await addItem(medicine.id, effectivePrice, isLoggedIn);
@@ -42,85 +39,99 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
   };
 
   return (
-    <Card className="flex h-full flex-col justify-between overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-md">
-      <Link href={`/medicines/${medicine.id}`}>
-        {/* Image */}
-        <div className="relative aspect-4/3 bg-muted">
-          <img
-            src={medicine.image}
-            alt={medicine.name}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+    <Card className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-xl transition-all duration-300">
+      
+      {/* Image */}
+      <div className="relative h-44 overflow-hidden bg-muted">
+        <img
+          src={medicine.image}
+          alt={medicine.name}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+
+        {hasDiscount && (
+          <span className="absolute left-3 top-3 rounded-full bg-destructive px-3 py-1 text-[10px] font-semibold text-destructive-foreground shadow">
+            {Math.round((1 - effectivePrice / medicine.price) * 100)}% OFF
+          </span>
+        )}
+
+        {/* Quick View */}
+        <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Link href={`/medicines/${medicine.id}`}>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="rounded-full px-4 shadow-md"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              View
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Content */}
+      <CardContent className="p-4 space-y-2">
+        <div>
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
+            {medicine.manufacturer}
+          </p>
+
+          <CardTitle className="text-sm font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+            {medicine.name}
+          </CardTitle>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-bold text-foreground">
+            ৳ {effectivePrice.toFixed(0)}
+          </span>
 
           {hasDiscount && (
-            <span className="absolute right-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
-              {Math.round((1 - effectivePrice / medicine.price) * 100)}% OFF
+            <span className="text-xs line-through text-muted-foreground">
+              ৳ {medicine.price.toFixed(0)}
             </span>
           )}
         </div>
 
-        {/* Header */}
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="line-clamp-2 text-base">
-            {medicine.name}
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            {medicine.manufacturer}
-          </p>
-        </CardHeader>
-
-        {/* Content */}
-        <CardContent className="flex flex-1 flex-col gap-2 px-4 pb-4 text-sm">
-          <p className="line-clamp-2 text-muted-foreground">
-            {medicine.description}
-          </p>
-
-          <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold">
-              ৳ {effectivePrice.toFixed(2)}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm line-through text-muted-foreground">
-                ৳ {medicine.price.toFixed(2)}
-              </span>
-            )}
-          </div>
-
-          {rating > 0 && (
-            <div className="flex items-center gap-1 text-xs">
-              <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-              <span>{rating.toFixed(1)}</span>
-              <span className="text-muted-foreground">
-                ({medicine.reviews.length})
+        {/* Rating + Stock */}
+        <div className="flex items-center justify-between text-xs">
+          {rating > 0 ? (
+            <div className="flex items-center gap-1 text-yellow-500">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span className="font-medium text-foreground">
+                {rating.toFixed(1)}
               </span>
             </div>
+          ) : (
+            <span className="text-muted-foreground">No reviews</span>
           )}
 
-          <div className="mt-auto text-xs">
-            {outOfStock ? (
-              <span className="font-medium text-red-600">Out of stock</span>
-            ) : (
-              <span className="text-green-700">In stock: {medicine.stock}</span>
-            )}
-          </div>
-        </CardContent>
-      </Link>
+          {outOfStock ? (
+            <span className="text-destructive font-medium">Out</span>
+          ) : (
+            <span className="text-emerald-500 font-medium">In Stock</span>
+          )}
+        </div>
+      </CardContent>
 
-      {/* Footer */}
+      {/* Action */}
       <CardFooter className="p-4 pt-0">
         <Button
-          className="w-full"
+          className="w-full rounded-xl font-semibold transition-all active:scale-95"
           disabled={outOfStock || adding}
           onClick={handleAdd}
         >
-          {outOfStock
-            ? "Out of Stock"
-            : adding
-              ? "Adding..."
-              : added
-                ? "Added ✓"
-                : "Add to Cart"}
+          {adding ? (
+            "Adding..."
+          ) : (
+            <>
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to Cart
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>
