@@ -32,12 +32,15 @@ export function MedicineFilters({
   setCategory,
   maxPrice,
   setMaxPrice,
-  categories,
+  categories: categoriesData,
   isCategoriesLoading,
   onReset,
 }: FiltersProps) {
+  // console.log("Category :", categoriesData);
+  const categoryList = (categoriesData as any)?.categories || [];
+  // console.log(categoryList);
   const hasFilters = search || category !== "all" || maxPrice < 100;
-
+  
   const handleReset = useCallback(() => {
     setSearch("");
     setCategory("all");
@@ -62,7 +65,7 @@ export function MedicineFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories?.map((c) => (
+            {categoryList.map((c: any) => (
               <SelectItem key={c.id} value={c.slug}>
                 {c.name}
               </SelectItem>
@@ -77,7 +80,6 @@ export function MedicineFilters({
           <span>৳ {maxPrice}</span>
         </div>
         <Slider
-        
           value={[maxPrice]}
           min={0}
           max={1500}
@@ -95,7 +97,3 @@ export function MedicineFilters({
     </div>
   );
 }
-
-
-
-
