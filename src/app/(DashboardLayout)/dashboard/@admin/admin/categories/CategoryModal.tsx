@@ -11,13 +11,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pill, Syringe, Stethoscope, FlaskConical, HeartPulse, Thermometer, Baby, Activity, PlusCircle } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// পপুলার মেডিকেল আইকনগুলোর একটি লিস্ট
+const MEDICAL_ICONS = [
+  { name: "Pill", icon: Pill },
+  { name: "Syringe", icon: Syringe },
+  { name: "Stethoscope", icon: Stethoscope },
+  { name: "FlaskConical", icon: FlaskConical },
+  { name: "HeartPulse", icon: HeartPulse },
+  { name: "Thermometer", icon: Thermometer },
+  { name: "Baby", icon: Baby },
+  { name: "Activity", icon: Activity },
+  { name: "PlusCircle", icon: PlusCircle },
+];
 
 interface CategoryFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: { name: string; slug: string }) => void;
-  initialData?: { name: string; slug: string };
+  onSubmit: (values: { name: string; slug: string; icon: string }) => void;
+  initialData?: { name: string; slug: string; icon?: string };
   isLoading: boolean;
   mode: "add" | "edit";
 }
@@ -34,16 +49,17 @@ export const CategoryFormModal = ({
     defaultValues: {
       name: initialData?.name ?? "",
       slug: initialData?.slug ?? "",
+      icon: initialData?.icon ?? "Pill", // ডিফল্ট আইকন
     },
     onSubmit: async ({ value }) => {
       onSubmit(value);
     },
   });
 
-  // slug generator
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
+      .trim()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "");
   };
@@ -77,7 +93,6 @@ export const CategoryFormModal = ({
                   onBlur={field.handleBlur}
                   onChange={(e) => {
                     field.handleChange(e.target.value);
-                    // Add মোডে থাকলে অটো স্লাগ জেনারেট হবে
                     if (mode === "add") {
                       form.setFieldValue("slug", generateSlug(e.target.value));
                     }
@@ -101,6 +116,40 @@ export const CategoryFormModal = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="e.g. antibiotics"
                 />
+              </div>
+            )}
+          />
+
+          {/* Icon Selection Field */}
+          <form.Field
+            name="icon"
+            children={(field) => (
+              <div className="space-y-3">
+                <Label>Select Category Icon</Label>
+                <div className="grid grid-cols-5 gap-2">
+                  {MEDICAL_ICONS.map((item) => {
+                    const IconComp = item.icon;
+                    return (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => field.handleChange(item.name)}
+                        className={cn(
+                          "flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all hover:bg-primary/5",
+                          field.state.value === item.name
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground"
+                        )}
+                      >
+                        <IconComp className="h-5 w-5" />
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Custom icon name input (optional) */}
+                <p className="text-[10px] text-muted-foreground italic">
+                  Selected: <span className="font-bold text-primary">{field.state.value}</span>
+                </p>
               </div>
             )}
           />

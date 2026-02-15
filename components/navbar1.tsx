@@ -30,6 +30,7 @@ import { ModeToggle } from "./ui/moodToggle";
 import { getCurrentUser } from "@/lib/get-user";
 import { AvatarDropdown } from "./AvatarDropDown";
 import { CartDrawer } from "./CartDrawer";
+import { Logo2 } from "./Logo2";
 
 interface MenuItem {
   title: string;
@@ -62,12 +63,7 @@ interface Navbar1Props {
 }
 
 const Navbar1 = async ({
-  logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
-    alt: "Medistore",
-    title: "Medistore",
-  },
+ 
   menu = [
     { title: "Home", url: "/" },
     { title: "Medicines", url: "/medicines" },
@@ -88,16 +84,7 @@ const Navbar1 = async ({
         <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
-              <img
-                src={logo.src}
-                className="max-h-8 dark:invert"
-                alt={logo.alt}
-              />
-              <span className="text-lg font-semibold tracking-tighter">
-                {logo.title}
-              </span>
-            </a>
+            <Logo2></Logo2>
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
@@ -128,14 +115,7 @@ const Navbar1 = async ({
         {/* Mobile Menu */}
         <div className="block px-2 lg:hidden">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
-              <img
-                src={logo.src}
-                className="max-h-8 dark:invert"
-                alt={logo.alt}
-              />
-            </a>
+            <Logo2></Logo2>
             <div className="flex items-center gap-2">
               {/* <CartSheet /> */}
               <CartDrawer></CartDrawer>
@@ -158,13 +138,7 @@ const Navbar1 = async ({
                 <SheetContent className="overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>
-                      <a href={logo.url} className="flex items-center gap-2">
-                        <img
-                          src={logo.src}
-                          className="max-h-8 dark:invert"
-                          alt={logo.alt}
-                        />
-                      </a>
+                     <Logo2></Logo2>
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-6 p-4">

@@ -40,6 +40,7 @@ import {
 import { generateBreadcrumbs } from "@/src/helpers/generateBreadcrumbs";
 import { getSidebarData } from "@/src/constant/sidebar-items";
 import { SidebarProfileCard } from "./SidebarProfileCardProps";
+import { Logo2 } from "../Logo2";
 
 // types
 type SidebarData = {
@@ -65,18 +66,10 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => (
     <SidebarMenuItem>
       <SidebarMenuButton size="lg" asChild>
         <Link href="/">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
-            <img
-              src={logo.src}
-              alt={logo.alt}
-              className="size-6 invert dark:invert-0"
-            />
-          </div>
+          
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-medium">{logo.title}</span>
-            <span className="text-xs text-muted-foreground">
-              {logo.description}
-            </span>
+           
+            <Logo2></Logo2>
           </div>
         </Link>
       </SidebarMenuButton>

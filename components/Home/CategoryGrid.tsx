@@ -5,9 +5,9 @@ import api from "@/lib/axios";
 import * as Icons from "lucide-react";
 import { Loader2, ChevronRight, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "../ui/skeleton";
 
 export const CategoryGrid = () => {
-  // ব্যাকএন্ড থেকে ডাইনামিক ক্যাটেগরি ফেচ করা
   const { data, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -38,19 +38,33 @@ export const CategoryGrid = () => {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex h-60 items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground animate-pulse">
-              Loading categories...
-            </p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className="p-8 rounded-[2rem] border bg-card shadow-sm space-y-5"
+            >
+              {/* Icon Skeleton */}
+              <div className="flex justify-center">
+                <Skeleton className="h-16 w-16 rounded-2xl" />
+              </div>
+
+              {/* Title Skeleton */}
+              <div className="flex justify-center">
+                <Skeleton className="h-4 w-24 rounded-md" />
+              </div>
+
+              {/* Small Text Skeleton */}
+              <div className="flex justify-center">
+                <Skeleton className="h-3 w-16 rounded-md" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         /* Dynamic Category Grid */
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {data?.map((cat: any) => {
-           
             const IconComponent = (Icons as any)[cat.icon] || Pill;
 
             return (

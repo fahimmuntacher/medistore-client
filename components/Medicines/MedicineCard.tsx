@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, Eye, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +14,7 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
   const { isLoggedIn } = useAuth();
   const [adding, setAdding] = useState(false);
   const { addItem, loading: cartLoading } = useCartStore();
-
+  // console.log("medicine from medicine card", medicine);
   const effectivePrice = getEffectivePrice(medicine);
   const hasDiscount = effectivePrice < medicine.price;
   const outOfStock = medicine.stock === 0;
@@ -30,6 +25,8 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
         medicine.reviews.length
       : 0;
 
+  // console.log(rating);
+  // console.log("medicine review", rating);
   const handleAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (outOfStock || cartLoading) return;
@@ -40,7 +37,6 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
 
   return (
     <Card className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-xl transition-all duration-300">
-      
       {/* Image */}
       <div className="relative h-44 overflow-hidden bg-muted">
         <img
@@ -104,6 +100,7 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
               <span className="font-medium text-foreground">
                 {rating.toFixed(1)}
               </span>
+              <span className="font-bold text-yellow-500">({medicine.reviews.length})</span>
             </div>
           ) : (
             <span className="text-muted-foreground">No reviews</span>

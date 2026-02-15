@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Medicine } from "@/src/types/medicine";
 import { MedicineCard } from "../Medicines/MedicineCard";
+import { MedicineCardSkeleton } from "../Medicines/MedicineCardSkeleton";
 
 export const FeaturedMedicines = () => {
   const { data: medicines, isLoading } = useQuery({
@@ -45,11 +46,10 @@ export const FeaturedMedicines = () => {
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground animate-pulse">
-              Fetching latest medicines...
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <MedicineCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">

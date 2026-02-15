@@ -30,7 +30,7 @@ const MedicinesDetails = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
-  
+
   const { addItem } = useCartStore();
   const { isLoggedIn } = useAuth();
 
@@ -52,12 +52,10 @@ const MedicinesDetails = () => {
 
   const handleAddToCart = async () => {
     if (!medicine) return;
-    
+
     setAdding(true);
     try {
-     
       await addItem(medicine.id, medicine.price, !!isLoggedIn);
-      
     } catch (error) {
       toast.error("Failed to add to cart");
     } finally {
@@ -66,10 +64,13 @@ const MedicinesDetails = () => {
   };
 
   if (loading) {
-    return <MedicineSkeleton></MedicineSkeleton>
+    return <MedicineSkeleton></MedicineSkeleton>;
   }
 
-  if (!medicine) return <div className="text-center py-20 font-bold">Medicine not found!</div>;
+  if (!medicine)
+    return (
+      <div className="text-center py-20 font-bold">Medicine not found!</div>
+    );
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -77,7 +78,7 @@ const MedicinesDetails = () => {
         href="/medicines"
         className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-primary mb-8"
       >
-        <ChevronLeft className="h-4 w-4 mr-1" /> 
+        <ChevronLeft className="h-4 w-4 mr-1" />
         Back to Medicines
       </Link>
 
@@ -99,11 +100,22 @@ const MedicinesDetails = () => {
         <div className="flex flex-col">
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-3">
-              <Badge variant="secondary" className="rounded-md px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase">
+              <Badge
+                variant="secondary"
+                className="rounded-md px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase"
+              >
                 {medicine.category?.name}
               </Badge>
-              <Badge className={medicine.stock > 0 ? "bg-green-600 text-white" : "bg-red-600 text-white"}>
-                {medicine.stock > 0 ? `In Stock (${medicine.stock})` : "Out of Stock"}
+              <Badge
+                className={
+                  medicine.stock > 0
+                    ? "bg-green-600 text-white"
+                    : "bg-red-600 text-white"
+                }
+              >
+                {medicine.stock > 0
+                  ? `In Stock (${medicine.stock})`
+                  : "Out of Stock"}
               </Badge>
             </div>
 
@@ -112,12 +124,17 @@ const MedicinesDetails = () => {
                 {medicine.name}
               </h1>
               <p className="text-lg text-muted-foreground font-semibold">
-                Brand: <span className="text-foreground font-bold">{medicine.manufacturer}</span>
+                Brand:{" "}
+                <span className="text-foreground font-bold">
+                  {medicine.manufacturer}
+                </span>
               </p>
             </div>
 
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-black text-primary">৳{medicine.price}</span>
+              <span className="text-4xl font-black text-primary">
+                ৳{medicine.price}
+              </span>
               {medicine.discountPrice > 0 && (
                 <span className="text-xl text-muted-foreground line-through">
                   ৳{medicine.discountPrice}
@@ -126,7 +143,9 @@ const MedicinesDetails = () => {
             </div>
 
             <div className="bg-muted/30 p-4 rounded-xl border-l-4 border-primary">
-               <p className="text-muted-foreground leading-relaxed">{medicine.description}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {medicine.description}
+              </p>
             </div>
 
             <Separator />
@@ -135,11 +154,19 @@ const MedicinesDetails = () => {
             <div className="flex items-center justify-between p-4 bg-background border-2 border-muted rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full overflow-hidden border">
-                   <img src={medicine.seller?.image} alt="seller" className="h-full w-full object-cover" />
+                  <img
+                    src={medicine.seller?.image}
+                    alt="seller"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Seller</p>
-                  <p className="text-sm font-bold text-primary">{medicine.seller?.name}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                    Seller
+                  </p>
+                  <p className="text-sm font-bold text-primary">
+                    {medicine.seller?.name}
+                  </p>
                 </div>
               </div>
               <Store className="h-5 w-5 text-muted-foreground" />
@@ -172,7 +199,11 @@ const MedicinesDetails = () => {
                 disabled={medicine.stock === 0 || adding}
                 className="w-full h-12 text-md font-bold rounded-xl gap-2 px-8"
               >
-                {adding ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShoppingCart className="h-5 w-5" />}
+                {adding ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <ShoppingCart className="h-5 w-5" />
+                )}
                 {medicine.stock === 0 ? "Out of Stock" : "Add to Cart"}
               </Button>
             </div>
@@ -182,11 +213,16 @@ const MedicinesDetails = () => {
               {[
                 { icon: ShieldCheck, label: "Genuine" },
                 { icon: Truck, label: "Fast Delivery" },
-                { icon: PackageCheck, label: "Secure" }
+                { icon: PackageCheck, label: "Secure" },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center p-3 border rounded-xl">
+                <div
+                  key={i}
+                  className="flex flex-col items-center p-3 border rounded-xl"
+                >
                   <item.icon className="h-5 w-5 text-primary mb-1" />
-                  <span className="text-[10px] font-bold uppercase text-muted-foreground">{item.label}</span>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground">
+                    {item.label}
+                  </span>
                 </div>
               ))}
             </div>
