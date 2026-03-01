@@ -22,8 +22,7 @@ const Logo2 = ({
   url = "/",
 }: LogoProps) => {
   return (
-    <Link
-      href={url}
+    <div
       className={cn(
         "flex items-center gap-2 group transition-all active:scale-95",
         className,
@@ -59,7 +58,7 @@ const Logo2 = ({
           Medi<span className="text-primary">store</span>
         </span>
       )}
-    </Link>
+    </div>
   );
 };
 

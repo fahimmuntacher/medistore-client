@@ -8,7 +8,7 @@ const SocialLogin = () => {
   const LoginWithGoogle = async () => {
     const data = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "http://localhost:3000",
+      callbackURL: `${process.env.NEXT_PUBLIC_CLIENT_URL}`,
     });
     router.push("/");
     toast.success("Great to see you again!");

@@ -1,18 +1,18 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
 import * as Icons from "lucide-react";
 import { Loader2, ChevronRight, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "../ui/skeleton";
+import { categoryService } from "@/src/services";
 
 export const CategoryGrid = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const res = await api.get("/categories?limit=8");
-      return res.data.categories;
+      const res = await categoryService.getAllCategories({ limit: 8 });
+      return res?.categories || [];
     },
   });
 

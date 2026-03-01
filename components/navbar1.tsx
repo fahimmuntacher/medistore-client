@@ -1,3 +1,5 @@
+"use client";
+
 import { Book, Menu, ShoppingCart, Sunset, Trees, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -31,6 +33,7 @@ import { getCurrentUser } from "@/lib/get-user";
 import { AvatarDropdown } from "./AvatarDropDown";
 import { CartDrawer } from "./CartDrawer";
 import { Logo2 } from "./Logo2";
+import { useUser } from "@/hooks/useSession";
 
 interface MenuItem {
   title: string;
@@ -62,8 +65,7 @@ interface Navbar1Props {
   };
 }
 
-const Navbar1 = async ({
- 
+const Navbar1 = ({
   menu = [
     { title: "Home", url: "/" },
     { title: "Medicines", url: "/medicines" },
@@ -76,15 +78,20 @@ const Navbar1 = async ({
   },
   className,
 }: Navbar1Props) => {
-  const user = await getCurrentUser();
+  const { user, isLoading } = useUser(); // session user 
+  // console.log(user);
+  if (isLoading) {
+    // Optional: show a placeholder or skeleton while loading
+    return <div className="h-16" />;
+  }
+
   return (
     <section className={cn("py-4 bg-background", className)}>
       <div className="container mx-auto">
         {/* Desktop Menu */}
         <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
-            {/* Logo */}
-            <Logo2></Logo2>
+            <Logo2 />
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
@@ -94,11 +101,16 @@ const Navbar1 = async ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* <CartSheet /> */}
-            <CartDrawer></CartDrawer>
+            <CartDrawer />
             <ModeToggle />
             {user ? (
-              <AvatarDropdown user={user} />
+              <AvatarDropdown
+                user={{
+                  name: user.name,
+                  email: user.email,
+                  image: user.image ?? undefined,
+                }}
+              />
             ) : (
               <>
                 <Button asChild variant="outline" size="sm">
@@ -115,19 +127,22 @@ const Navbar1 = async ({
         {/* Mobile Menu */}
         <div className="block px-2 lg:hidden">
           <div className="flex items-center justify-between">
-            <Logo2></Logo2>
+            <Logo2 />
             <div className="flex items-center gap-2">
-              {/* <CartSheet /> */}
-              <CartDrawer></CartDrawer>
+              <CartDrawer />
               <ModeToggle />
               {user ? (
-                <AvatarDropdown user={user} />
+                <AvatarDropdown
+                  user={{
+                    name: user.name,
+                    email: user.email,
+                    image: user.image ?? undefined,
+                  }}
+                />
               ) : (
-                <>
-                  <Button asChild variant="outline" size="sm">
-                    <a href={auth.login.url}>{auth.login.title}</a>
-                  </Button>
-                </>
+                <Button asChild variant="outline" size="sm">
+                  <a href={auth.login.url}>{auth.login.title}</a>
+                </Button>
               )}
               <Sheet>
                 <SheetTrigger asChild>
@@ -138,7 +153,7 @@ const Navbar1 = async ({
                 <SheetContent className="overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>
-                     <Logo2></Logo2>
+                      <Logo2 />
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-6 p-4">
@@ -159,6 +174,109 @@ const Navbar1 = async ({
     </section>
   );
 };
+
+// const Navbar1 = async ({
+//   menu = [
+//     { title: "Home", url: "/" },
+//     { title: "Medicines", url: "/medicines" },
+//     { title: "Contact Us", url: "/contact" },
+//     { title: "About Us", url: "/about-us" },
+//   ],
+//   auth = {
+//     login: { title: "Login", url: "/login" },
+//     signup: { title: "Sign up", url: "/register" },
+//   },
+//   className,
+// }: Navbar1Props) => {
+//   const user = await getCurrentUser();
+
+//   // const { user, loading } = useAuth();
+//   // console.log("user from useauth", user);
+//   // if (loading) {
+//   //   return <div className="h-16" />; // Simple placeholder
+//   // }
+//   return (
+//     <section className={cn("py-4 bg-background", className)}>
+//       <div className="container mx-auto">
+//         {/* Desktop Menu */}
+//         <nav className="hidden items-center justify-between lg:flex">
+//           <div className="flex items-center gap-6">
+//             {/* Logo */}
+//             <Logo2></Logo2>
+//             <div className="flex items-center">
+//               <NavigationMenu>
+//                 <NavigationMenuList>
+//                   {menu.map((item) => renderMenuItem(item))}
+//                 </NavigationMenuList>
+//               </NavigationMenu>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             {/* <CartSheet /> */}
+//             <CartDrawer></CartDrawer>
+//             <ModeToggle />
+//             {user ? (
+//               <AvatarDropdown user={user} />
+//             ) : (
+//               <>
+//                 <Button asChild variant="outline" size="sm">
+//                   <a href={auth.login.url}>{auth.login.title}</a>
+//                 </Button>
+//                 <Button asChild size="sm">
+//                   <a href={auth.signup.url}>{auth.signup.title}</a>
+//                 </Button>
+//               </>
+//             )}
+//           </div>
+//         </nav>
+
+//         {/* Mobile Menu */}
+//         <div className="block px-2 lg:hidden">
+//           <div className="flex items-center justify-between">
+//             <Logo2></Logo2>
+//             <div className="flex items-center gap-2">
+//               {/* <CartSheet /> */}
+//               <CartDrawer></CartDrawer>
+//               <ModeToggle />
+//               {user ? (
+//                 <AvatarDropdown user={user} />
+//               ) : (
+//                 <>
+//                   <Button asChild variant="outline" size="sm">
+//                     <a href={auth.login.url}>{auth.login.title}</a>
+//                   </Button>
+//                 </>
+//               )}
+//               <Sheet>
+//                 <SheetTrigger asChild>
+//                   <Button variant="outline" size="icon">
+//                     <Menu className="size-4" />
+//                   </Button>
+//                 </SheetTrigger>
+//                 <SheetContent className="overflow-y-auto">
+//                   <SheetHeader>
+//                     <SheetTitle>
+//                       <Logo2></Logo2>
+//                     </SheetTitle>
+//                   </SheetHeader>
+//                   <div className="flex flex-col gap-6 p-4">
+//                     <Accordion
+//                       type="single"
+//                       collapsible
+//                       className="flex w-full flex-col gap-4"
+//                     >
+//                       {menu.map((item) => renderMobileMenuItem(item))}
+//                     </Accordion>
+//                   </div>
+//                 </SheetContent>
+//               </Sheet>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// };
 
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {

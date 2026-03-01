@@ -11,12 +11,14 @@ export function useAuth() {
     const fetchUser = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_AUTH_URL}/get-session`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/get-session`,
           {
             withCredentials: true,
           },
         );
         setUser(res.data?.user ?? null);
+        // console.log(res);
+        // console.log("user ",user);
       } catch (err) {
         setUser(null);
       } finally {

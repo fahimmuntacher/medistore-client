@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
-import api from "@/lib/axios";
 import { toast } from "sonner";
 import { Loader2, ImagePlus, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { useCategories } from "@/hooks/useMedicines";
+import { medicineService } from "@/src/services";
 
 // Zod Schema
 const medicineSchema = z.object({
@@ -47,15 +48,14 @@ export function AddMedicineModal({ trigger }: { trigger?: React.ReactNode }) {
   const queryClient = useQueryClient();
 
   // Categories Fetching
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await api.get("/categories");
-      return res.data;
-    },
-  });
+  const categories = useCategories();
+  const categoryList = categories.data || [];
 
-  // Cloudinary Upload 
+  // log raw categories when they arrive
+  console.log("Add medicine modal - categories query:", categories);
+  console.log("Add medicine modal - category list items:", categoryList);
+
+  // Cloudinary Upload
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("image", file);
@@ -68,7 +68,8 @@ export function AddMedicineModal({ trigger }: { trigger?: React.ReactNode }) {
   // Create Medicine Mutation
   const { mutate: createMedicine, isPending: isSubmitting } = useMutation({
     mutationFn: async (data: MedicineFormData) => {
-      return api.post("/medicines", data);
+      console.log("AddMedicine - form data before send:", data);
+      return medicineService.createMedicine(data);
     },
     onSuccess: () => {
       toast.success("Medicine added successfully!");
@@ -78,7 +79,19 @@ export function AddMedicineModal({ trigger }: { trigger?: React.ReactNode }) {
       setSelectedFile(null);
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.error || "Failed to add medicine");
+      // avoid letting devtools lazily access properties that might not exist
+      const safeErr = {
+        message: err?.message || String(err),
+        status: err?.response?.status,
+        data: err?.response?.data || err?.data,
+        stack: err?.stack || "",
+      };
+      console.error("AddMedicine error response:", safeErr);
+      toast.error(
+        safeErr.data?.message ||
+          safeErr.data?.error ||
+          "Failed to add medicine",
+      );
     },
   });
 
@@ -97,10 +110,29 @@ export function AddMedicineModal({ trigger }: { trigger?: React.ReactNode }) {
       try {
         let finalImageUrl = "";
         if (selectedFile) {
+          console.log(" AddMedicine - uploading file:", selectedFile.name);
           finalImageUrl = await uploadToCloudinary(selectedFile);
+          console.log(" AddMedicine - uploaded image URL:", finalImageUrl);
+        } else {
+          console.log(" AddMedicine - NO image selected");
         }
-        createMedicine({ ...value, image: finalImageUrl });
+        const dataToSend = { ...value, image: finalImageUrl };
+        console.log("AddMedicine - final data to send:", dataToSend);
+        // sanity-check categoryId before calling API
+        if (
+          !dataToSend.categoryId ||
+          !categoryList.find((c: any) => c.id === dataToSend.categoryId)
+        ) {
+          console.error(
+            "AddMedicine - invalid categoryId",
+            dataToSend.categoryId,
+          );
+          toast.error("Please select a valid category before submitting.");
+        } else {
+          createMedicine(dataToSend);
+        }
       } catch (error) {
+        console.error("AddMedicine - upload error:", error);
         toast.error("Image upload failed");
       } finally {
         setIsUploading(false);
@@ -176,9 +208,10 @@ export function AddMedicineModal({ trigger }: { trigger?: React.ReactNode }) {
                     <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories?.map((cat: any) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
+                    {categoryList.map((c: any) => (
+                      // send the actual database id so backend FK constraint passes
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

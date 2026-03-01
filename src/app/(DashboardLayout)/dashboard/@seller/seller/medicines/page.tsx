@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "@/lib/axios";
 import Image from "next/image";
 import {
   Table,
@@ -36,29 +35,9 @@ import {
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
 import { AddMedicineModal } from "@/components/Medicines/AddMedicineModal";
 import { PaginationControls } from "@/components/Medicines/PaginationControls";
+import { medicineService } from "@/src/services";
 
-/* ---------------- API Functions ---------------- */
-const fetchSellerMedicines = async (page: number, search: string) => {
-  const res = await api.get("/medicines/seller", {
-    params: {
-      page,
-      limit: 10,
-      search,
-    },
-  });
-  // console.log(res.data);
-  return res.data;
-};
-
-const updateMedicine = async ({ id, data }: { id: string; data: any }) => {
-  const res = await api.put(`/medicines/${id}`, data);
-  return res.data;
-};
-
-const deleteMedicine = async (id: string) => {
-  const res = await api.delete(`/medicines/${id}`);
-  return res.data;
-};
+/* API calls are now handled by medicineService */
 
 /* ---------------- Component ---------------- */
 const SellerMedicinePage = () => {
@@ -72,32 +51,42 @@ const SellerMedicinePage = () => {
   // get medicine
   const { data, isLoading } = useQuery({
     queryKey: ["seller-medicines", page, searchTerm],
-    queryFn: () => fetchSellerMedicines(page, searchTerm),
-    
+    queryFn: async () => {
+      const res = await medicineService.getSellerMedicines({
+        page,
+        limit: 10,
+        search: searchTerm,
+      });
+      console.log(res);
+      return res; // unwrap to get MedicineResponse
+    },
   });
   const medicines = data?.medicines ?? [];
-
+  // console.log(data);
   const pagination = data?.pagination ?? {
     page: 1,
     totalPages: 1,
     total: 0,
   };
 
+  // console.log(pagination);
+
   // update
   const { mutate: handleUpdate, isPending: isUpdating } = useMutation({
-    mutationFn: updateMedicine,
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      medicineService.updateMedicine(id, data),
     onSuccess: () => {
       toast.success("Medicine updated!");
       queryClient.invalidateQueries({ queryKey: ["seller-medicines"] });
       setIsEditDialogOpen(false);
     },
-    onError: (err: any) =>
-      toast.error(err.response?.data?.error || "Update failed"),
+    onError: (err: any) => toast.error(err?.data?.message || "Update failed"),
   });
 
   // Delete
   const { mutate: handleDelete, isPending: isDeleting } = useMutation({
-    mutationFn: deleteMedicine,
+    mutationFn: (medicineId: string) =>
+      medicineService.deleteMedicine(medicineId),
     onSuccess: () => {
       toast.success("Medicine deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["seller-medicines"] });
@@ -106,8 +95,6 @@ const SellerMedicinePage = () => {
     onError: (err: any) =>
       toast.error(err.response?.data?.error || "Delete failed"),
   });
-
- 
 
   return (
     <div className="p-4 md:p-8 space-y-6 text-foreground">
@@ -122,7 +109,6 @@ const SellerMedicinePage = () => {
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              
               placeholder="Search medicine..."
               className="pl-9"
               value={searchTerm}

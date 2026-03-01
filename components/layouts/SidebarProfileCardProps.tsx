@@ -9,11 +9,14 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { useUser } from "@/hooks/useSession";
 
 export const SidebarProfileCard = () => {
-  const { user, loading } = useAuth();
-    console.log(user);
-  if (loading) {
+  // const { user, loading } = useAuth();
+  const { user, isLoading } = useUser();
+
+  console.log(user);
+  if (isLoading) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
@@ -34,24 +37,19 @@ export const SidebarProfileCard = () => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild size="lg" >
-          <Link
-            href="/my-profile"
-            className="flex items-center gap-3"
-          >
+        <SidebarMenuButton asChild size="lg">
+          <Link href="/my-profile" className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={user.image} alt={user.name} />
+              <AvatarImage src={user.image ?? undefined} alt={user.name} />
               <AvatarFallback>
                 <User className="h-4 w-4" />
               </AvatarFallback>
             </Avatar>
 
             <div className="flex flex-col text-left leading-tight">
-              <span className="text-sm font-medium">
-                {user.name ?? "User"}
-              </span>
+              <span className="text-sm font-medium">{user.name ?? "User"}</span>
               <span className="text-xs text-muted-foreground capitalize">
-                {user.role}
+                {user?.role}
               </span>
             </div>
           </Link>

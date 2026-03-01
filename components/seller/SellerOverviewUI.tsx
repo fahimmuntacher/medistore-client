@@ -31,6 +31,7 @@ interface SellerOverviewUIProps {
 }
 
 export default function SellerOverviewUI({ data }: SellerOverviewUIProps) {
+  console.log(data);
   const {
     totalOrders,
     totalItemsSold,

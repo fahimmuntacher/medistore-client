@@ -1,36 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import api from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
 import CustomerOverviewUI from "@/components/customer/CustomerOverviewUI";
 import CustomerOverviewSkeleton from "@/components/customer/CustomerOverviewSkeleton";
+import { dashboardService } from "@/src/services";
 
 export default function CustomerDashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ["customer-dashboard"],
+    queryFn: () => dashboardService.getCustomerDashboard(),
+  });
 
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/dashboard/customer");
-        setData(response.data);
-      } catch (err) {
-        console.error("Error fetching customer data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomerData();
-  }, []);
-
-  if (loading) {
-    return <CustomerOverviewSkeleton></CustomerOverviewSkeleton>;
+  if (isLoading) {
+    return <CustomerOverviewSkeleton />;
   }
 
   if (!data)
     return <div className="p-10 text-center">Failed to load data.</div>;
 
-  return <CustomerOverviewUI data={data} />;
+  return <CustomerOverviewUI data={data.data} />;
 }

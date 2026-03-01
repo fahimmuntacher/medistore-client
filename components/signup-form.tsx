@@ -187,7 +187,7 @@ export function SignupForm({
           setIsUploading(false);
           return;
         }
-
+        
         toast.success("User Registered Successfully", { id: toastId });
         router.push("/");
         // console.log(data);

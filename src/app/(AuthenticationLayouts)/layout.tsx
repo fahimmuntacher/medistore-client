@@ -1,4 +1,5 @@
 import { Logo } from "@/components/logo";
+import { Logo2 } from "@/components/Logo2";
 
 export default function AuthLayout({
   children,
@@ -20,6 +21,7 @@ export default function AuthLayout({
 
       {/* Right side (Form) */}
       <div className="">
+        
         {children}
       </div>
     </div>

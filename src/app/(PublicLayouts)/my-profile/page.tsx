@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Mail, ShieldCheck, CalendarDays, User, Pencil } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useUser } from "@/hooks/useSession";
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useUser();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="h-40 rounded-xl bg-muted animate-pulse" />
@@ -31,7 +31,7 @@ export default function ProfilePage() {
       <Card className="rounded-2xl">
         <CardContent className="flex flex-col sm:flex-row items-center gap-6 p-6">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={user.image} alt={user.name} />
+            <AvatarImage src={user.image as string} alt={user.name} />
             <AvatarFallback>
               <User className="h-8 w-8" />
             </AvatarFallback>
@@ -42,7 +42,7 @@ export default function ProfilePage() {
             <p className="text-muted-foreground">{user.email}</p>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
-              <Badge className="capitalize">{user.role.toLowerCase()}</Badge>
+              <Badge className="capitalize">{user.role!.toLowerCase()}</Badge>
               {user.emailVerified && (
                 <Badge variant="outline" className="gap-1">
                   <ShieldCheck className="h-3 w-3" />
@@ -107,7 +107,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Account Role</span>
               <Badge variant="secondary" className="capitalize">
-                {user.role.toLowerCase()}
+                {user.role!.toLowerCase()}
               </Badge>
             </div>
 

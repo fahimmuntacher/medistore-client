@@ -66,9 +66,7 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => (
     <SidebarMenuItem>
       <SidebarMenuButton size="lg" asChild>
         <Link href="/">
-          
           <div className="flex flex-col gap-0.5 leading-none">
-           
             <Logo2></Logo2>
           </div>
         </Link>
@@ -80,8 +78,8 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => (
 const AppSidebar = ({
   role,
   ...props
-}: { role: string } & React.ComponentProps<typeof Sidebar>) => {
-  const navGroups = getSidebarData(role);
+}: { role?: string } & React.ComponentProps<typeof Sidebar>) => {
+  const navGroups = getSidebarData(role as string);
   const pathname = usePathname();
 
   return (
@@ -145,7 +143,7 @@ const AppSidebar = ({
 interface DashboardSidebarProps {
   className?: string;
   children: React.ReactNode;
-  role: string;
+  role?: string;
 }
 
 const DashbaordSidebar = ({

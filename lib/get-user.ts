@@ -6,7 +6,7 @@ import { cache } from "react";
 export const getCurrentUser = cache(async () => {
   try {
     const cookieStore = await cookies();
-    
+    // console.log(cookieStore);
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH_URL}/get-session`, {
       headers: {
         Cookie: cookieStore.toString(),
@@ -18,7 +18,9 @@ export const getCurrentUser = cache(async () => {
       return null;
     }
 
+    // console.log("res", res);
     const session = await res.json();
+    // console.log(session);
     return session?.user ?? null;
   } catch (error) {
     console.error("Failed to get current user:", error);
@@ -33,7 +35,7 @@ export const getSession = cache(async () => {
     if(!cookieStore){
       return null
     }
-    const res = await fetch("http://localhost:5000/api/auth/get-session", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/get-session`, {
       headers: {
         Cookie: cookieStore.toString(),
       },
@@ -44,6 +46,7 @@ export const getSession = cache(async () => {
       return null;
     }
 
+    // console.log("get user res", res);
     return await res.json();
   } catch (error) {
     console.error("Failed to get session:", error);

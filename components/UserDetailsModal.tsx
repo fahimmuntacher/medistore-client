@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
 import {
   Dialog,
   DialogContent,
@@ -41,8 +40,9 @@ export const UserDetailsModal = ({
     queryKey: ["user-details", userId],
     queryFn: async () => {
       if (!userId) return null;
-      const res = await api.get(`/users/${userId}`);
-      return res.data.data;
+      // Note: We'll need to create a userService if user endpoints are needed
+      // For now, this component needs to be updated based on your user API structure
+      return null;
     },
     enabled: !!userId && isOpen,
   });

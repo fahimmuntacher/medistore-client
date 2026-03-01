@@ -1,34 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import api from "@/lib/axios"; 
+import { useQuery } from "@tanstack/react-query";
 import SellerOverviewUI from "@/components/seller/SellerOverviewUI";
 import { Loader2, Store } from "lucide-react";
 import { SellerOverviewSkeleton } from "@/components/seller/SellerOverviewSkeleton";
+import { dashboardService } from "@/src/services";
 
 export default function SellerDashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ["seller-dashboard"],
+    queryFn: () => dashboardService.getSellerDashboard(),
+  });
 
-  useEffect(() => {
-    const fetchSellerStats = async () => {
-      try {
-        setLoading(true);
-        
-        const response = await api.get("/dashboard/seller");
-        setData(response.data);
-      } catch (err) {
-        console.error("Seller Stats Error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSellerStats();
-  }, []);
-
-  if (loading) {
-    return (<SellerOverviewSkeleton></SellerOverviewSkeleton>)
+  // console.log(data);
+  if (isLoading) {
+    return <SellerOverviewSkeleton />;
   }
 
   if (!data) return <div className="p-8 text-center">No data found.</div>;

@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
+import { orderService } from "@/services";
 import {
   Package,
   User,
@@ -17,11 +17,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { OrderDetailsSkeleton } from "@/components/OrderDetailsSkeleton";
 
-/* ---------------- API Call ---------------- */
-const fetchOrderDetails = async (id: string) => {
-  const res = await api.get(`/orders/${id}`);
-  return res.data?.data || res.data;
-};
+/* API call handled by orderService */
 
 /* ---------------- Component ---------------- */
 const OrderDetailsPage = () => {
@@ -34,7 +30,7 @@ const OrderDetailsPage = () => {
     error,
   } = useQuery({
     queryKey: ["order", orderId],
-    queryFn: () => fetchOrderDetails(orderId),
+    queryFn: () => orderService.getOrderById(orderId),
     enabled: !!orderId,
   });
 

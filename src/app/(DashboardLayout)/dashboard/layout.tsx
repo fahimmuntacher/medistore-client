@@ -1,7 +1,7 @@
-"use client";
 import { DashbaordSidebar } from "@/components/layouts/SideBar";
-import { useAuth } from "@/hooks/useAuth";
+
 import { roles } from "@/src/constant/role";
+import { userService } from "@/src/services/user.service";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,10 +10,13 @@ interface LayoutProps {
   customer: React.ReactNode;
 }
 
-const Layout = ({ children, admin, seller, customer }: LayoutProps) => {
-  const { user } = useAuth();
-  const role = user?.role || "CUSTOMER";
-
+const Layout = async ({ children, admin, seller, customer }: LayoutProps) => {
+  const sessionResponse = await userService.getSession();
+  // console.log(sessionResponse);
+  const userInfo = await sessionResponse?.data?.user;
+  // console.log(userInfo);
+  const role = userInfo?.role;
+  // console.log(role);
   const renderContent = () => {
     switch (role) {
       case roles.admin:

@@ -1,21 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
 import { Eye, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Medicine } from "@/src/types/medicine";
 import { MedicineCard } from "../Medicines/MedicineCard";
 import { MedicineCardSkeleton } from "../Medicines/MedicineCardSkeleton";
+import { medicineService } from "@/src/services";
 
 export const FeaturedMedicines = () => {
   const { data: medicines, isLoading } = useQuery({
     queryKey: ["featured-medicines"],
     queryFn: async () => {
-      const res = await api.get("/medicines?limit=8");
-
-      return res.data.medicines || res.data.data;
+      const res = await medicineService.getAllMedicines({ limit: 8 });
+      return res?.medicines || [];
     },
   });
 
@@ -53,7 +51,7 @@ export const FeaturedMedicines = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {medicines?.map((medicine: Medicine) => (
+            {medicines?.map((medicine) => (
               <div
                 key={medicine.id}
                 className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"

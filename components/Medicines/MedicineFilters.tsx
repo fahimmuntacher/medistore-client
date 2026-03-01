@@ -37,10 +37,8 @@ export function MedicineFilters({
   onReset,
 }: FiltersProps) {
   // console.log("Category :", categoriesData);
-  const categoryList = (categoriesData as any)?.categories || [];
-  // console.log(categoryList);
   const hasFilters = search || category !== "all" || maxPrice < 100;
-  
+
   const handleReset = useCallback(() => {
     setSearch("");
     setCategory("all");
@@ -48,6 +46,8 @@ export function MedicineFilters({
     onReset();
   }, [setSearch, setCategory, setMaxPrice, onReset]);
 
+  // prefer data passed from parent to avoid duplicate queries
+  const categoryList = categoriesData || [];
   return (
     <div className="flex flex-wrap gap-4 mb-8 items-end">
       <div className="flex-1 min-w-[220px]">
@@ -65,6 +65,7 @@ export function MedicineFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
+
             {categoryList.map((c: any) => (
               <SelectItem key={c.id} value={c.slug}>
                 {c.name}

@@ -1,4 +1,3 @@
-import z from "zod";
 
 export type Medicine = {
   id: string;

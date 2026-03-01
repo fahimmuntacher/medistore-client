@@ -18,26 +18,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
-import api from "@/lib/axios";
 import { MedicineSkeleton } from "@/components/MedicineSkeleton";
 import { MedicineReviews } from "./MedicineReviews";
+import { useUser } from "@/hooks/useSession";
+import { medicineService } from "@/src/services";
 
 const MedicinesDetails = () => {
   const { id } = useParams();
+  // console.log("medi id", id);
   const [medicine, setMedicine] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
   const { addItem } = useCartStore();
-  const { isLoggedIn } = useAuth();
+  // const { isLoggedIn } = useAuth();
+  const {user} = useUser(); 
 
   useEffect(() => {
     const fetchMedicine = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/medicines/${id}`);
-        setMedicine(res.data);
+        const res = await medicineService.getMedicineById(id as string);
+        // console.log("single medi res", res);
+        setMedicine(res);
+        // console.log("medi", res);
       } catch (error) {
         toast.error("Could not load medicine details.");
       } finally {
@@ -51,7 +55,7 @@ const MedicinesDetails = () => {
     if (!medicine) return;
     setAdding(true);
     try {
-      await addItem(medicine.id, medicine.price, !!isLoggedIn);
+      await addItem(medicine.id, medicine.price, !!user);
       toast.success("Added to cart");
     } catch (error) {
       toast.error("Failed to add to cart");

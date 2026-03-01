@@ -25,21 +25,12 @@ import {
 import { Loader2, Ban, Package, Calendar, Info, Star } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/axios";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
 import { PaginationControls } from "@/components/Medicines/PaginationControls";
 import { ReviewModal } from "./ReviewModal";
+import { orderService } from "@/src/services";
 
-const fetchOrders = async (page: number) => {
-  const res = await api.get("/orders", {
-    params: { page, limit: 10 },
-  });
-  return res.data.data;
-};
-
-const cancelOrder = async (orderId: string) => {
-  return api.put(`/orders/${orderId}`, { status: "CANCELLED" });
-};
+/* API calls handled by orderService */
 
 export default function CustomerOrder() {
   const queryClient = useQueryClient();
@@ -47,24 +38,24 @@ export default function CustomerOrder() {
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["my-orders", page],
-    queryFn: () => fetchOrders(page),
+    queryFn: () => orderService.getMyOrders({ page, limit: 10 }),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const orders = data?.orders ?? [];
-  const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 };
+  const orders = data?.data.orders ?? [];
+  const pagination = data?.data.pagination || { page: 1, totalPages: 1, total: 0 };
 
   const { mutate: cancel, isPending } = useMutation({
-    mutationFn: cancelOrder,
+    mutationFn: (orderId: string) => orderService.cancelOrder(orderId),
     onSuccess: () => {
       toast.success("Order cancelled successfully");
       queryClient.invalidateQueries({ queryKey: ["my-orders"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Cancellation failed.");
+      toast.error(error?.data?.message || "Cancellation failed.");
     },
   });
 

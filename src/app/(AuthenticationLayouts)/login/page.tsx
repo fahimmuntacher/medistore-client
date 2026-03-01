@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/login-form";
+import { Logo2 } from "@/components/Logo2";
 import { PillBottle } from "lucide-react";
 import Link from "next/link";
 
@@ -10,10 +11,7 @@ export default function Page() {
           href="/"
           className="flex items-center gap-2 self-center font-medium"
         >
-          <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-            <PillBottle className="size-4" />
-          </div>
-          MEDISTORE
+         <Logo2></Logo2>
         </Link>
         <LoginForm />
       </div>

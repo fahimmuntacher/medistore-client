@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "@/lib/axios";
 import {
   Table,
   TableBody,
@@ -43,30 +42,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { OrdersTableSkeleton } from "@/components/OrdersTableSkeleton";
 import { PaginationControls } from "@/components/Medicines/PaginationControls";
+import { orderService } from "@/src/services";
 
-/* ---------------- API Functions ---------------- */
-const fetchSellerOrders = async (page: number, search: string) => {
-  const res = await api.get("/orders", {
-    params: {
-      page,
-      limit: 10,
-      search,
-    },
-  });
-
-  return res.data.data;
-};
-
-const updateOrderStatus = async ({
-  id,
-  status,
-}: {
-  id: string;
-  status: string;
-}) => {
-  const res = await api.put(`/orders/${id}`, { status });
-  return res.data;
-};
+/* API calls are now handled by orderService */
+/* No need for separate API functions anymore */
 
 const SellerOrdersPage = () => {
   const queryClient = useQueryClient();
@@ -75,22 +54,24 @@ const SellerOrdersPage = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["seller-orders", page, searchTerm],
-    queryFn: () => fetchSellerOrders(page, searchTerm),
+    queryFn: () =>
+      orderService.getSellerOrders({ page, limit: 10, search: searchTerm }),
   });
 
   const { mutate: handleStatusUpdate, isPending: isUpdating } = useMutation({
-    mutationFn: updateOrderStatus,
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      orderService.updateOrderStatus(id, status),
     onSuccess: () => {
       toast.success("Order status updated!");
       queryClient.invalidateQueries({ queryKey: ["seller-orders"] });
     },
     onError: (err: any) =>
-      toast.error(err.response?.data?.error || "Failed to update"),
+      toast.error(err?.data?.message || "Failed to update"),
   });
 
-  const orders = data?.orders ?? [];
-
-  const pagination = data?.pagination || {
+  const orders = data?.data.orders ?? [];
+  // console.log(orders);
+  const pagination = data?.data.pagination ?? {
     page: 1,
     totalPages: 1,
     total: 0,
@@ -113,9 +94,7 @@ const SellerOrdersPage = () => {
     }
   };
 
-  console.log(orders);
-
-  
+  // console.log(orders);
 
   return (
     <div className="p-4 md:p-8 space-y-6">

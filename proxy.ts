@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { roles } from "./constant/role";
+import { roles } from "./src/constant/role";
 
 const ROLE_BASE_PATH = {
   [roles.admin]: "/dashboard/admin",
@@ -59,3 +59,44 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: ["/login", "/register", "/dashboard/:path*"],
 };
+
+// import { NextRequest, NextResponse } from "next/server";
+
+// const ROLE_BASE_PATH = {
+//   admin: "/dashboard/admin",
+//   seller: "/dashboard/seller",
+//   customer: "/dashboard/customer",
+// };
+
+// export async function proxy(request: NextRequest) {
+//   const pathname = request.nextUrl.pathname;
+//   console.log("proxy pathname", pathname);
+//   const token = request.cookies.get("better-auth.session_token");
+//   console.log("proxy token",token);
+//   // skip auth pages if no token
+//   if (!token) {
+//     if (pathname.startsWith("/dashboard")) {
+//       return NextResponse.redirect(new URL("/login", request.url));
+//     }
+//     return NextResponse.next();
+//   }
+
+//   // optionally prevent logged-in users from accessing auth pages
+//   if (pathname === "/login" || pathname === "/register") {
+//     return NextResponse.redirect(new URL("/dashboard", request.url));
+//   }
+
+//   // Optional: redirect /dashboard root to role-specific dashboard
+//   // (avoid calling API in middleware)
+//   if (pathname === "/dashboard") {
+//     // you can decode role from token here if it's JWT
+//     // or handle this logic inside the dashboard page itself
+//     return NextResponse.next();
+//   }
+
+//   return NextResponse.next();
+// }
+
+// export const config = {
+//   matcher: ["/dashboard/:path*", "/login", "/register"],
+// };

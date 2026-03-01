@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { toast } from "sonner";
-import api from "@/lib/axios";
 import { useAuth } from "@/hooks/useAuth";
+import { cartService } from "@/src/services";
 
 interface CartStore {
   items: any[];
@@ -21,11 +21,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   fetchCart: async () => {
     try {
-      const res = await api.get("/cart");
-      if (res.data.success) {
+      const cart = await cartService.getCart();
+      if (cart) {
         set({ 
-          items: res.data.data.items, 
-          total: res.data.data.total 
+          items: cart.items || [], 
+          total: cart.total || 0 
         });
       }
     } catch (err) {
@@ -42,11 +42,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
     try {
       set({ loading: true });
-      await api.post("/cart", { medicineId, price, quantity: 1 });
+      await cartService.addItem(medicineId, 1);
       await get().fetchCart();
       toast.success("Medicine added to cart");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to add item");
+      toast.error(error?.data?.message || "Failed to add item");
     } finally {
       set({ loading: false });
     }
@@ -55,17 +55,17 @@ export const useCartStore = create<CartStore>((set, get) => ({
   updateQty: async (itemId, quantity) => {
     console.log(itemId);
     try {
-      await api.patch(`/cart/${itemId}`, { quantity });
+      await cartService.updateItem(itemId, quantity);
       await get().fetchCart();
     } catch (error) {
-        console.log(error);
+      console.log(error);
       toast.error("Failed to update quantity");
     }
   },
 
   removeItem: async (itemId) => {
     try {
-      await api.delete(`/cart/${itemId}`);
+      await cartService.removeItem(itemId);
       await get().fetchCart();
       toast.success("Item removed from cart");
     } catch (error) {
@@ -75,7 +75,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   clearCart: async () => {
     try {
-      await api.delete("/cart/clear");
+      await cartService.clearCart();
       set({ items: [], total: 0 }); // Locally reset state after successful API call
     } catch (error) {
       console.error("Failed to clear cart", error);

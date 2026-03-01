@@ -24,7 +24,6 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
-
 // Zod schema for login form
 const loginSchema = z.object({
   email: z
@@ -68,8 +67,12 @@ export function LoginForm({
           toast.error(error.message, { id: toastId });
           return;
         }
-        router.push("/");
-        toast.success("Great to see you again!", { id: toastId });
+
+        if (data) {
+          // console.log(data);
+          router.push("/");
+          toast.success("Great to see you again!", { id: toastId });
+        }
         // console.log(data);
       } catch (error) {
         toast.error("Something went wrong, Please try again!");

@@ -2,12 +2,6 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Star, Loader2, MessageSquarePlus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import api from "@/lib/axios";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -17,6 +11,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { reviewService } from "@/src/services";
+import { Loader2, MessageSquarePlus, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ReviewModalProps {
   medicineId: string;
@@ -42,7 +41,7 @@ export const ReviewModal = ({
       if (rating === 0) return toast.error("Please select a rating");
 
       try {
-        await api.post("/reviews", {
+        await reviewService.createReview({
           medicineId,
           orderId,
           rating,
@@ -52,7 +51,7 @@ export const ReviewModal = ({
         queryClient.invalidateQueries({ queryKey: ["my-orders"] });
         setIsOpen(false);
       } catch (error: any) {
-        toast.error(error.response?.data?.message || "Something went wrong");
+        toast.error(error?.data?.message || "Something went wrong");
       }
     },
   });

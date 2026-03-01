@@ -18,8 +18,14 @@ export default function MedicinesPage() {
     maxPrice,
     page,
   });
+  // console.log("Medi data", data);
   const { data: categories, isLoading: catLoading } = useCategories();
-
+  // console.log(data);
+  // console.log(categories);
+  const medicines = data?.medicines ?? [];
+  const pagination = data?.pagination;
+  // console.log("medicine", medicines);
+  // console.log("pagination", pagination);
   const resetPage = useCallback(() => setPage(1), []);
 
   const handleResetFilters = useCallback(() => {
@@ -46,16 +52,16 @@ export default function MedicinesPage() {
       />
 
       <MedicineGrid
-        medicines={data?.medicines ?? []}
+        medicines={medicines}
         isLoading={isLoading}
         isError={false}
         emptyMessage="No medicines found with current filters."
       />
 
-      {data?.pagination && data.pagination.totalPages > 1 && (
+      {pagination && pagination.totalPages > 1 && (
         <PaginationControls
           currentPage={page}
-          totalPages={data.pagination.totalPages}
+          totalPages={pagination.totalPages}
           onPageChange={setPage}
         />
       )}
